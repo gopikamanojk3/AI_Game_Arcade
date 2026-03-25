@@ -46,6 +46,7 @@
     background: #0d0d1a;
     overflow-x: auto;
     border-bottom: 1px solid #1e1535;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-tab {
@@ -997,7 +998,7 @@ document.addEventListener('keydown', e => {
   let sx, sy;
   const board = document.getElementById('board2048');
   if (!board) return;
-  board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+  board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
   board.addEventListener('touchend', e => {
     if (aiRunning) return;
     const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
