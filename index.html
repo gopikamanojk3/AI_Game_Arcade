@@ -1026,7 +1026,7 @@ reset2048();
 // ======================== RPS ========================
 let rpsHistory=[], rpsScores={you:0,ai:0,tie:0};
 const rpsEmoji={R:'✊',P:'✋',S:'✌️'};
-const rpsBeats={R:'P',P:'S',S:'R'};
+const rpsBeats={R:'S',P:'R',S:'P'};
 const rpsNames={R:'Rock',P:'Paper',S:'Scissors'};
 
 function playRPS(choice) {
@@ -1210,4 +1210,5 @@ document.addEventListener('keydown', e => {
 })();
 
 resetSnake();
+resetRPS();
 </script>
