@@ -4,45 +4,212 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Game Arcade</title>
-    <script src="path/to/your/polyfill.js"></script>
-    <script src="path/to/your/gameLoop.js"></script>
-    <script src="path/to/your/collisionDetection.js"></script>
-    <script src="path/to/your/aiAlgorithms.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #faf8ef;
+            padding: 20px;
+        }
+        h1 {
+            color: #776e65;
+        }
+        .game-container {
+            margin: 20px;
+            padding: 20px;
+            border: 2px solid #bbada0;
+            border-radius: 10px;
+            background: #bbada0;
+        }
+        #game2048 {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-template-rows: repeat(4, 80px);
+            gap: 10px;
+            background: #bbada0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .tile {
+            background: #cdc1b4;
+            border-radius: 3px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            color: #776e65;
+            user-select: none;
+            transition: all 0.15s ease-in-out;
+        }
+        .tile.tile-2 { background: #eee4da; color: #776e65; }
+        .tile.tile-4 { background: #ede0c8; color: #776e65; }
+        .tile.tile-8 { background: #f2b179; color: #f9f6f2; }
+        .tile.tile-16 { background: #f59563; color: #f9f6f2; }
+        .tile.tile-32 { background: #f67c5f; color: #f9f6f2; }
+        .tile.tile-64 { background: #f65e3b; color: #f9f6f2; }
+        .tile.tile-128 { background: #edcf72; color: #095f6b; font-size: 30px; }
+        .tile.tile-256 { background: #edcc61; color: #095f6b; font-size: 30px; }
+        .tile.tile-512 { background: #edc850; color: #095f6b; font-size: 30px; }
+        .tile.tile-1024 { background: #edc53f; color: #095f6b; font-size: 25px; }
+        .tile.tile-2048 { background: #edc22e; color: #095f6b; font-size: 25px; }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #8f7a66;
+            color: #f9f6f2;
+            border: none;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #9f8a76;
+        }
+        .score {
+            font-size: 20px;
+            color: #776e65;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome to AI Game Arcade</h1>
-    <div id="games">
-        <div id="mazeGame"></div>
-        <div id="snakeGame"></div>
+    <div class="game-container">
+        <h2>2048 Game</h2>
+        <div class="score">Score: <span id="score">0</span></div>
         <div id="game2048"></div>
+        <div class="controls">
+            <button onclick="newGame()">New Game</button>
+            <p style="color: #776e65; font-size: 14px;">Use arrow keys to play</p>
+        </div>
     </div>
+
     <script>
-        // Maze Game implementation
-        function startMazeGame() {
-            // Complete maze game logic with collision detection and AI algorithm
-            console.log('Maze game started!');
-            // Implement the complete maze game here...
+        const gridSize = 4;
+        let board = [];
+        let score = 0;
+
+        function initBoard() {
+            board = Array(gridSize).fill(null).map(() => Array(gridSize).fill(0));
+            score = 0;
+            addNewTile();
+            addNewTile();
+            render();
         }
 
-        // Snake Game implementation
-        function startSnakeGame() {
-            // Complete snake game logic with collision detection and AI algorithm
-            console.log('Snake game started!');
-            // Implement the complete snake game here...
+        function addNewTile() {
+            const emptyCells = [];
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (board[i][j] === 0) {
+                        emptyCells.push({ x: i, y: j });
+                    }
+                }
+            }
+            if (emptyCells.length > 0) {
+                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                board[randomCell.x][randomCell.y] = Math.random() < 0.9 ? 2 : 4;
+            }
         }
 
-        // 2048 Game implementation
-        function start2048Game() {
-            // Complete 2048 game logic with collision detection and AI algorithm
-            console.log('2048 game started!');
-            // Implement the complete 2048 game here...
+        function render() {
+            const gameDiv = document.getElementById('game2048');
+            gameDiv.innerHTML = '';
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const value = board[i][j];
+                    const tile = document.createElement('div');
+                    tile.className = 'tile' + (value > 0 ? ' tile-' + value : '');
+                    tile.textContent = value > 0 ? value : '';
+                    gameDiv.appendChild(tile);
+                }
+            }
+            document.getElementById('score').textContent = score;
         }
 
-        // Initialize games
-        startMazeGame();
-        startSnakeGame();
-        start2048Game();
+        function move(direction) {
+            let moved = false;
+            const newBoard = board.map(row => [...row]);
+
+            if (direction === 'left' || direction === 'right') {
+                for (let i = 0; i < gridSize; i++) {
+                    const row = direction === 'left' ? newBoard[i] : newBoard[i].reverse();
+                    const result = slideAndMerge(row);
+                    if (!arraysEqual(row, result)) moved = true;
+                    newBoard[i] = direction === 'left' ? result : result.reverse();
+                }
+            } else {
+                for (let j = 0; j < gridSize; j++) {
+                    let column = newBoard.map(row => row[j]);
+                    const result = slideAndMerge(direction === 'up' ? column : column.reverse());
+                    if (!arraysEqual(column, result)) moved = true;
+                    const newColumn = direction === 'up' ? result : result.reverse();
+                    for (let i = 0; i < gridSize; i++) {
+                        newBoard[i][j] = newColumn[i];
+                    }
+                }
+            }
+
+            if (moved) {
+                board = newBoard;
+                addNewTile();
+                render();
+                if (isGameOver()) {
+                    setTimeout(() => alert('Game Over! Final Score: ' + score), 200);
+                }
+            }
+        }
+
+        function slideAndMerge(array) {
+            let arr = array.filter(val => val !== 0);
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] === arr[i + 1]) {
+                    arr[i] *= 2;
+                    score += arr[i];
+                    arr.splice(i + 1, 1);
+                }
+            }
+            while (arr.length < gridSize) {
+                arr.push(0);
+            }
+            return arr;
+        }
+
+        function arraysEqual(a, b) {
+            return a.length === b.length && a.every((val, idx) => val === b[idx]);
+        }
+
+        function isGameOver() {
+            // Check if any moves are possible
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (board[i][j] === 0) return false;
+                    if (j < gridSize - 1 && board[i][j] === board[i][j + 1]) return false;
+                    if (i < gridSize - 1 && board[i][j] === board[i + 1][j]) return false;
+                }
+            }
+            return true;
+        }
+
+        function newGame() {
+            initBoard();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') { e.preventDefault(); move('up'); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); move('down'); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); move('left'); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); move('right'); }
+        });
+
+        // Initialize game on page load
+        initBoard();
     </script>
 </body>
 </html>
