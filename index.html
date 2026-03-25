@@ -2,290 +2,168 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<style>html,body{background:#0a0a0f;margin:0;padding:0;}</style>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  * { -webkit-tap-highlight-color: transparent; }
+  button { cursor: pointer; font-family: inherit; }
+  button, .ttt-cell, .rps-btn { user-select: none; -webkit-user-select: none; }
+
+  /* ── CSS Variables ── */
+  :root {
+    --bg:        #0a0a0f;
+    --bg2:       #0d0d1a;
+    --bg3:       #12101e;
+    --bg4:       #1e1535;
+    --border:    #2a1f4a;
+    --border2:   #1e1535;
+    --purple:    #c084fc;
+    --purple2:   #a78bfa;
+    --purple3:   #7c3aed;
+    --purple4:   #4c1d95;
+    --purple5:   #6d28d9;
+    --green:     #34d399;
+    --red:       #f87171;
+    --text:      #e8e6f0;
+    --muted:     #6b5a8e;
+    --muted2:    #4a3a6e;
+    --panel-w:   560px;   /* content width on desktop */
+  }
+
+  /* ── Page shell ── */
+  html, body { background: var(--bg); min-height: 100vh; }
 
   .arcade {
     font-family: 'DM Sans', sans-serif;
-    background: #0a0a0f;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
-    color: #e8e6f0;
-    padding: 0;
+    max-width: var(--panel-w);
+    margin: 0 auto;
   }
 
+  /* ── Header ── */
   .arcade-header {
-    background: linear-gradient(135deg, #0d0d1a 0%, #1a0d2e 100%);
-    border-bottom: 1px solid #2a1f4a;
-    padding: 1.5rem 1.5rem 1rem;
+    background: linear-gradient(135deg, var(--bg2) 0%, #1a0d2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem 1rem;
     text-align: center;
   }
-
   .arcade-title {
     font-family: 'Space Mono', monospace;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    color: #c084fc;
+    color: var(--purple);
     letter-spacing: 4px;
     text-transform: uppercase;
   }
-
   .arcade-sub {
-    font-size: 12px;
-    color: #6b5a8e;
+    font-size: 11px;
+    color: var(--muted);
     margin-top: 4px;
     letter-spacing: 2px;
     text-transform: uppercase;
   }
 
+  /* ── Nav tabs ── */
   .nav-tabs {
     display: flex;
     gap: 4px;
-    padding: 1rem 1rem 0;
-    background: #0d0d1a;
+    padding: 0.75rem 0.75rem 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
     overflow-x: auto;
-    border-bottom: 1px solid #1e1535;
+    scrollbar-width: none;
   }
+  .nav-tabs::-webkit-scrollbar { display: none; }
 
   .nav-tab {
     flex: 1;
-    min-width: 90px;
-    padding: 8px 6px;
-    border: 1px solid #2a1f4a;
+    min-width: 88px;
+    padding: 8px 6px 7px;
+    border: 1px solid var(--border);
     border-bottom: none;
     border-radius: 8px 8px 0 0;
-    background: #12101e;
-    color: #6b5a8e;
+    background: var(--bg3);
+    color: var(--muted);
     font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 500;
-    cursor: pointer;
     text-align: center;
-    transition: all 0.15s;
+    transition: background 0.15s, color 0.15s;
     white-space: nowrap;
   }
-
-  .nav-tab:hover { background: #1e1535; color: #a78bfa; }
-
-  .nav-tab.active {
-    background: #0a0a0f;
-    color: #c084fc;
-    border-color: #7c3aed;
-    border-bottom: 1px solid #0a0a0f;
-  }
-
+  .nav-tab:hover  { background: var(--bg4); color: var(--purple2); }
+  .nav-tab.active { background: var(--bg); color: var(--purple); border-color: var(--purple3); border-bottom: 1px solid var(--bg); }
   .nav-tab .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
-  .nav-tab .tab-unit { font-size: 9px; color: #4a3a6e; display: block; margin-top: 2px; }
-  .nav-tab.active .tab-unit { color: #7c3aed; }
+  .nav-tab .tab-unit { font-size: 9px; color: var(--muted2); display: block; margin-top: 2px; }
+  .nav-tab.active .tab-unit { color: var(--purple3); }
 
-  .game-panel { display: none; padding: 1.25rem; }
+  /* ── Game panel ── */
+  .game-panel { display: none; padding: 1.25rem 1.25rem 2rem; }
   .game-panel.active { display: block; }
 
+  /* ── AI badge ── */
   .ai-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     background: #1e0f35;
-    border: 1px solid #4c1d95;
+    border: 1px solid var(--purple4);
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 11px;
-    color: #a78bfa;
+    color: var(--purple2);
     margin-bottom: 1rem;
     font-family: 'Space Mono', monospace;
   }
-
   .ai-badge::before { content: "◆"; font-size: 8px; }
 
+  /* ── Buttons ── */
   .btn {
-    background: #4c1d95;
-    border: 1px solid #7c3aed;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--purple4);
+    border: 1px solid var(--purple3);
     border-radius: 8px;
-    color: #e8e6f0;
-    padding: 8px 18px;
-    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    padding: 9px 18px;
     font-size: 13px;
     font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
+    transition: background 0.15s;
+    min-height: 38px;
   }
-
-  .btn:hover { background: #6d28d9; }
+  .btn:hover  { background: var(--purple5); }
   .btn:active { transform: scale(0.97); }
+  .btn-sm     { padding: 7px 14px; font-size: 12px; min-height: 34px; }
+  .btn-ghost  { background: transparent; border-color: var(--border); color: var(--muted); }
+  .btn-ghost:hover { background: var(--bg4); border-color: var(--purple3); color: var(--purple2); }
 
-  .btn-sm { padding: 5px 12px; font-size: 12px; }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid #2a1f4a;
-    color: #6b5a8e;
-  }
-
-  .btn-ghost:hover { border-color: #7c3aed; color: #a78bfa; background: #1e1535; }
-
+  /* ── Status bar ── */
   .status-bar {
-    background: #12101e;
-    border: 1px solid #1e1535;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
     border-radius: 8px;
-    padding: 8px 14px;
+    padding: 9px 14px;
     font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: #a78bfa;
+    font-size: 11px;
+    color: var(--purple2);
     margin-bottom: 1rem;
-    min-height: 36px;
+    min-height: 38px;
     display: flex;
     align-items: center;
+    line-height: 1.4;
   }
 
-  /* ===== TIC TAC TOE ===== */
-  .ttt-board {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    max-width: 280px;
-    margin: 0 auto 1rem;
-  }
-
-  .ttt-cell {
-    aspect-ratio: 1;
-    background: #12101e;
-    border: 1px solid #2a1f4a;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 32px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .ttt-cell:hover:not(.taken) { background: #1e1535; border-color: #7c3aed; }
-  .ttt-cell.x { color: #c084fc; }
-  .ttt-cell.o { color: #34d399; }
-  .ttt-cell.win { background: #1e0f35; border-color: #c084fc; }
-
-  .diff-toggle { display: flex; gap: 6px; margin-bottom: 1rem; }
-
-  /* ===== MAZE CHASE ===== */
-  #mazeCanvas {
-    display: block;
-    border: 1px solid #2a1f4a;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto 1rem;
-    image-rendering: pixelated;
-  }
-
-  /* ===== 2048 AI ===== */
-  .game2048-board {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    max-width: 300px;
-    margin: 0 auto 1rem;
-    background: #12101e;
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid #2a1f4a;
-  }
-
-  .tile {
-    aspect-ratio: 1;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
-    font-size: 14px;
-    transition: all 0.1s;
-  }
-
-  .tile-0 { background: #1e1535; color: transparent; }
-  .tile-2 { background: #1e2235; color: #93c5fd; }
-  .tile-4 { background: #1e2b35; color: #6ee7b7; }
-  .tile-8 { background: #2a1f35; color: #c084fc; }
-  .tile-16 { background: #2a2a35; color: #fbbf24; }
-  .tile-32 { background: #351e1e; color: #f87171; }
-  .tile-64 { background: #3a1e1e; color: #fb923c; }
-  .tile-128 { background: #4a2a1e; font-size: 11px; color: #fde68a; }
-  .tile-256 { background: #5a2a1e; font-size: 11px; color: #fde68a; }
-  .tile-512 { background: #6a1e1e; font-size: 11px; color: #fff; }
-  .tile-1024 { background: #7c1e1e; font-size: 9px; color: #fff; }
-  .tile-2048 { background: #c084fc; font-size: 9px; color: #fff; }
-
-  .score-display {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 1rem;
-  }
-
-  .score-box {
-    flex: 1;
-    background: #12101e;
-    border: 1px solid #2a1f4a;
-    border-radius: 8px;
-    padding: 8px;
-    text-align: center;
-  }
-
-  .score-label { font-size: 10px; color: #6b5a8e; text-transform: uppercase; letter-spacing: 1px; }
-  .score-val { font-family: 'Space Mono', monospace; font-size: 18px; color: #c084fc; font-weight: 700; }
-
-  /* ===== RPS ===== */
-  .rps-choices { display: flex; gap: 10px; margin-bottom: 1rem; }
-
-  .rps-btn {
-    flex: 1;
-    aspect-ratio: 1;
-    background: #12101e;
-    border: 1px solid #2a1f4a;
-    border-radius: 12px;
-    font-size: 32px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .rps-btn:hover { background: #1e1535; border-color: #7c3aed; transform: scale(1.05); }
-  .rps-arena { display: flex; align-items: center; justify-content: center; gap: 24px; font-size: 48px; margin: 1rem 0; min-height: 80px; }
-  .rps-vs { font-family: 'Space Mono', monospace; font-size: 12px; color: #6b5a8e; }
-
-  .rps-freq {
-    background: #12101e;
-    border: 1px solid #1e1535;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 1rem;
-  }
-
-  .freq-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
-  .freq-bar { flex: 1; height: 6px; background: #1e1535; border-radius: 3px; overflow: hidden; }
-  .freq-fill { height: 100%; background: #7c3aed; border-radius: 3px; transition: width 0.3s; }
-
-  /* ===== SNAKE ===== */
-  #snakeCanvas {
-    display: block;
-    border: 1px solid #2a1f4a;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto 1rem;
-  }
-
-  .snake-controls { display: grid; grid-template-columns: repeat(3, 40px); gap: 4px; margin: 0 auto 1rem; width: 128px; }
-  .d-btn { width: 40px; height: 40px; background: #12101e; border: 1px solid #2a1f4a; border-radius: 6px; color: #a78bfa; font-size: 16px; cursor: pointer; transition: all 0.1s; display: flex; align-items: center; justify-content: center; }
-  .d-btn:hover { background: #1e1535; }
-  .d-btn:active { background: #2a1f4a; transform: scale(0.95); }
-
-  /* ===== HOW TO PLAY ===== */
+  /* ── How to Play ── */
   .how-to-play {
-    background: #12101e;
-    border: 1px solid #2a1f4a;
+    background: var(--bg3);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 14px;
     margin-bottom: 1rem;
@@ -297,8 +175,7 @@
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
-    color: #a78bfa;
-    letter-spacing: 0.5px;
+    color: var(--purple2);
     list-style: none;
     display: flex;
     align-items: center;
@@ -309,71 +186,199 @@
   .how-to-play summary::before { content: "▶"; font-size: 9px; transition: transform 0.2s; }
   .how-to-play[open] summary::before { transform: rotate(90deg); }
   .how-to-play .tip { margin-top: 8px; }
-  .how-to-play .tip b { color: #c084fc; }
+  .how-to-play .tip b { color: var(--purple); }
+
   .key {
     display: inline-block;
-    background: #1e1535;
-    border: 1px solid #4a3a6e;
+    background: var(--bg4);
+    border: 1px solid var(--muted2);
     border-radius: 4px;
     padding: 1px 6px;
     font-family: 'Space Mono', monospace;
     font-size: 10px;
-    color: #c084fc;
+    color: var(--purple);
   }
 
-  /* ===== GLOBAL TOUCH & UX ===== */
-  * { -webkit-tap-highlight-color: transparent; }
-  button, .ttt-cell, .rps-btn { user-select: none; -webkit-user-select: none; }
+  /* ── Diff toggle row ── */
+  .diff-toggle { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
 
-  /* ===== DESKTOP LAYOUT — centred max-width container ===== */
-  .arcade { max-width: 640px; margin: 0 auto; }
+  /* ── Score display ── */
+  .score-display { display: flex; gap: 10px; margin-bottom: 1rem; }
+  .score-box {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .score-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .score-val   { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--purple); font-weight: 700; line-height: 1.2; margin-top: 2px; }
 
-  /* Nav tabs — no overflow needed on desktop, wrap gracefully */
-  .nav-tabs { padding: 1rem 1.25rem 0; gap: 6px; flex-wrap: nowrap; }
-  .nav-tab { min-width: 80px; min-height: 52px; font-size: 11px; }
-  .nav-tab .tab-icon { font-size: 17px; }
+  /* ── TicTacToe ── */
+  .ttt-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 1.25rem;
+  }
+  .ttt-cell {
+    aspect-ratio: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .ttt-cell:hover:not(.taken) { background: var(--bg4); border-color: var(--purple3); }
+  .ttt-cell.x   { color: var(--purple); }
+  .ttt-cell.o   { color: var(--green); }
+  .ttt-cell.win { background: #1e0f35; border-color: var(--purple); }
 
-  /* Game panels comfortable on desktop */
-  .game-panel { padding: 1.5rem; }
-
-  /* Boards centred with sensible max */
-  .ttt-board { max-width: 320px; }
-  .ttt-cell { font-size: clamp(24px, 8vw, 40px); }
-  .game2048-board { max-width: 340px; }
-  .tile { font-size: clamp(13px, 3.5vw, 20px); }
-  #mazeCanvas, #snakeCanvas { max-width: 420px; image-rendering: auto; }
-
-  /* Buttons — comfortable on all sizes */
-  .btn { min-height: 40px; padding: 9px 20px; font-size: 14px; }
-  .btn-sm { min-height: 36px; padding: 7px 14px; font-size: 13px; }
+  /* ── Canvas games (maze + snake) ── */
+  #mazeCanvas, #snakeCanvas {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 1rem;
+    image-rendering: auto;
+  }
 
   /* D-pad */
-  .d-btn { width: 50px; height: 50px; font-size: 20px; border-radius: 10px; }
-  .snake-controls { grid-template-columns: repeat(3, 50px); gap: 6px; width: 162px; }
+  .snake-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(2, 48px);
+    gap: 5px;
+    margin: 0 auto 0.75rem;
+    width: 154px;
+  }
+  .d-btn {
+    width: 48px;
+    height: 48px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--purple2);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .d-btn:hover  { background: var(--bg4); }
+  .d-btn:active { background: var(--border); transform: scale(0.93); }
 
-  /* RPS */
-  .rps-btn { font-size: clamp(28px, 8vw, 44px); min-height: 72px; }
-  .rps-arena { font-size: clamp(36px, 10vw, 56px); }
+  /* ── 2048 ── */
+  .game2048-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 1rem;
+    background: var(--bg3);
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .tile {
+    aspect-ratio: 1;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: clamp(12px, 3.5vw, 20px);
+    transition: background 0.1s;
+  }
+  .tile-0    { background: var(--bg4); }
+  .tile-2    { background: #1e2235; color: #93c5fd; }
+  .tile-4    { background: #1e2b35; color: #6ee7b7; }
+  .tile-8    { background: #2a1f35; color: var(--purple); }
+  .tile-16   { background: #2a2a35; color: #fbbf24; }
+  .tile-32   { background: #351e1e; color: var(--red); }
+  .tile-64   { background: #3a1e1e; color: #fb923c; }
+  .tile-128  { background: #4a2a1e; color: #fde68a; }
+  .tile-256  { background: #5a2a1e; color: #fde68a; }
+  .tile-512  { background: #6a1e1e; color: #fff; }
+  .tile-1024 { background: #7c1e1e; color: #fff; font-size: clamp(10px, 2.5vw, 14px); }
+  .tile-2048 { background: var(--purple); color: #fff; font-size: clamp(10px, 2.5vw, 14px); }
+  .swipe-hint { font-size: 11px; color: var(--muted2); text-align: center; margin-top: 0.5rem; }
 
-  /* Score */
-  .score-val { font-size: clamp(16px, 4vw, 22px); }
+  /* ── RPS ── */
+  .rps-choices { display: flex; gap: 12px; margin-bottom: 1rem; }
+  .rps-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-height: 120px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: clamp(28px, 8vw, 46px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .rps-btn:hover  { background: var(--bg4); border-color: var(--purple3); transform: scale(1.05); }
+  .rps-btn:active { transform: scale(0.95); }
+  .rps-arena {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    font-size: clamp(36px, 10vw, 56px);
+    margin: 0.75rem 0;
+    min-height: 72px;
+  }
+  .rps-vs { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+  .rps-freq { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 12px; margin-bottom: 1rem; }
+  .freq-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+  .freq-bar { flex: 1; height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+  .freq-fill { height: 100%; background: var(--purple3); border-radius: 3px; transition: width 0.3s; }
 
-  /* Swipe hint */
-  .swipe-hint { font-size: 11px; color: #4a3a6e; text-align: center; margin-top: 0.4rem; }
+  /* ── Responsive ── */
+  /* Laptop / wide: give content a bit more breathing room */
+  @media (min-width: 600px) {
+    .arcade-title { font-size: 24px; }
+    .arcade-header { padding: 1.5rem 2rem 1.2rem; }
+    .game-panel { padding: 1.5rem 1.75rem 2.5rem; }
+    .nav-tab { min-width: 96px; font-size: 12px; padding: 10px 8px 8px; }
+    .nav-tab .tab-icon { font-size: 18px; }
+    .ttt-board { max-width: 320px; gap: 10px; }
+    .ttt-cell { font-size: 42px; border-radius: 14px; }
+    .game2048-board { max-width: 360px; gap: 8px; padding: 12px; }
+    .score-val { font-size: 22px; }
+    .status-bar { font-size: 12px; padding: 10px 16px; }
+    .btn { padding: 10px 22px; font-size: 14px; min-height: 40px; }
+    .btn-sm { padding: 8px 16px; font-size: 13px; min-height: 36px; }
+    .d-btn { width: 52px; height: 52px; font-size: 20px; }
+    .snake-controls { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); gap: 6px; width: 166px; }
+    .rps-btn { max-height: 140px; }
+  }
 
-  /* ===== MOBILE overrides ===== */
-  @media (max-width: 480px) {
-    .arcade-title { font-size: 17px; letter-spacing: 2px; }
+  /* Phone: tighten up */
+  @media (max-width: 400px) {
+    .arcade-title { font-size: 16px; letter-spacing: 2px; }
     .arcade-header { padding: 0.9rem 1rem 0.7rem; }
-    .game-panel { padding: 1rem 0.85rem; }
-    .nav-tabs { padding: 0.75rem 0.5rem 0; gap: 3px; overflow-x: auto; flex-wrap: nowrap; }
-    .nav-tab { min-width: 62px; font-size: 9.5px; min-height: 54px; padding: 6px 4px; }
-    .ttt-board { max-width: 100%; }
-    .game2048-board { max-width: 100%; }
-    #mazeCanvas, #snakeCanvas { max-width: 100%; }
-    .rps-choices { gap: 6px; }
+    .game-panel { padding: 0.9rem 0.9rem 1.5rem; }
+    .nav-tabs { gap: 3px; padding: 0.6rem 0.4rem 0; }
+    .nav-tab { min-width: 56px; font-size: 9px; padding: 7px 3px 6px; }
     .score-display { gap: 6px; }
-    .diff-toggle { flex-wrap: wrap; }
+    .diff-toggle { gap: 6px; }
+    .rps-choices { gap: 8px; }
+    .btn-sm { padding: 6px 10px; font-size: 11px; }
   }
 </style>
 
@@ -433,20 +438,22 @@
   <!-- MAZE -->
   <div class="game-panel" id="panel-maze">
     <div class="ai-badge">BFS Pathfinding — Optimal Pursuit</div>
-    <details class="how-to-play" open>
+    <details class="how-to-play">
       <summary>📖 How to Play</summary>
-      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">green square</span> in the bottom-right corner.</div>
-      <div class="tip"><b>You are the <span style="color:#c084fc">purple circle</span>.</b> Move with <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys or <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>. On mobile, use the D-pad buttons.</div>
-      <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter</span></b> — it uses BFS to chase you through the maze every time you move!</div>
-      <div class="tip">💡 Click <b>Show BFS Path</b> to see exactly where the hunter is heading.</div>
+      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">🟢 green square</span> in the bottom-right corner.</div>
+      <div class="tip"><b>You are the <span style="color:#c084fc">purple circle</span>.</b> Use <span class="key">↑↓←→</span> arrow keys, <span class="key">WASD</span>, or the D-pad below.</div>
+      <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter</span></b> — it uses BFS to chase you optimally!</div>
+      <div class="tip"><b>Easy:</b> Wider corridors, slower hunter. &nbsp;<b>Hard:</b> Tight maze, hunter matches your pace.</div>
     </details>
-    <canvas id="mazeCanvas"></canvas>
-    <div class="status-bar" id="maze-status">Arrow keys / WASD to move. Hunter uses BFS!</div>
-    <div style="display:flex;gap:8px;margin-bottom:0.75rem">
-      <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
-      <button class="btn btn-sm btn-ghost" onclick="toggleMazePath()">Show BFS Path</button>
+    <div class="diff-toggle" style="margin-bottom:0.75rem">
+      <button class="btn btn-sm" id="maze-btn-easy" onclick="setMazeDiff('easy')" style="background:#6d28d9;border-color:#c084fc">Easy</button>
+      <button class="btn btn-sm" id="maze-btn-hard" onclick="setMazeDiff('hard')">Hard</button>
+      <button class="btn btn-sm btn-ghost" onclick="initMaze()" style="margin-left:auto">New Maze</button>
+      <button class="btn btn-sm btn-ghost" id="mazePathBtn" onclick="toggleMazePath()">Show Path</button>
     </div>
-    <div class="snake-controls" style="margin:0 auto 0.5rem">
+    <canvas id="mazeCanvas"></canvas>
+    <div class="status-bar" id="maze-status">Choose difficulty and start moving!</div>
+    <div class="snake-controls" style="margin:0.75rem auto 0">
       <div></div><button class="d-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
       <button class="d-btn" onclick="movePlayer(-1,0)">←</button>
       <button class="d-btn" onclick="movePlayer(0,1)">↓</button>
