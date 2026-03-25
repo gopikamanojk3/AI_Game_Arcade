@@ -922,6 +922,7 @@ function mazeAutoStep() {
 }
 
 function drawMaze() {
+  const canvas = document.getElementById('mazeCanvas');
   if (!canvas || !mazeGrid) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
