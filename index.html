@@ -1,4 +1,7 @@
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
 
@@ -317,6 +320,63 @@
     font-size: 10px;
     color: #c084fc;
   }
+
+  /* ===== MOBILE / TOUCH IMPROVEMENTS ===== */
+
+  /* Prevent tap highlight flicker */
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* Prevent text selection on game buttons */
+  button, .ttt-cell, .rps-btn { user-select: none; -webkit-user-select: none; }
+
+  /* Larger touch targets for all buttons */
+  .btn { min-height: 44px; padding: 10px 18px; font-size: 14px; }
+  .btn-sm { min-height: 40px; padding: 8px 14px; font-size: 13px; }
+
+  /* Bigger D-pad buttons for thumb use */
+  .d-btn { width: 52px; height: 52px; font-size: 20px; border-radius: 10px; }
+  .snake-controls { grid-template-columns: repeat(3, 52px); gap: 6px; width: 168px; }
+
+  /* Nav tabs: scroll horizontally on tiny screens, bigger tap area */
+  .nav-tab { min-height: 56px; padding: 8px 4px; font-size: 10px; }
+  .nav-tab .tab-icon { font-size: 18px; }
+
+  /* TicTacToe board — full width on phones */
+  .ttt-board { max-width: 100%; }
+  .ttt-cell { font-size: clamp(24px, 10vw, 40px); border-radius: 12px; }
+
+  /* 2048 board — full width on phones */
+  .game2048-board { max-width: 100%; }
+  .tile { font-size: clamp(12px, 4vw, 18px); border-radius: 8px; }
+
+  /* RPS buttons — larger emoji, better touch area */
+  .rps-btn { font-size: clamp(28px, 12vw, 44px); border-radius: 16px; min-height: 80px; }
+  .rps-arena { font-size: clamp(36px, 14vw, 56px); }
+
+  /* Canvases — full width */
+  #mazeCanvas, #snakeCanvas { max-width: 100%; }
+
+  /* Score values — readable on small screens */
+  .score-val { font-size: clamp(16px, 5vw, 22px); }
+
+  /* Game panel padding tighter on small screens */
+  @media (max-width: 400px) {
+    .game-panel { padding: 1rem 0.75rem; }
+    .arcade-title { font-size: 18px; letter-spacing: 2px; }
+    .arcade-header { padding: 1rem 0.75rem 0.75rem; }
+    .nav-tab { font-size: 9px; min-width: 60px; }
+    .rps-choices { gap: 6px; }
+    .score-display { gap: 6px; }
+    .diff-toggle { flex-wrap: wrap; }
+  }
+
+  /* 2048 swipe controls hint on mobile */
+  .swipe-hint {
+    font-size: 11px;
+    color: #4a3a6e;
+    text-align: center;
+    margin-top: 0.4rem;
+  }
 </style>
 
 <div class="arcade">
@@ -411,7 +471,8 @@
       <div class="score-box"><div class="score-label">Best</div><div class="score-val" id="best2048">0</div></div>
     </div>
     <div class="game2048-board" id="board2048"></div>
-    <div class="status-bar" id="status2048">Use arrow keys to play · or let AI play!</div>
+    <div class="status-bar" id="status2048">Use arrow keys or swipe to play · or let AI play!</div>
+    <div class="swipe-hint">📱 Swipe on the board to move tiles</div>
     <div style="display:flex;gap:8px;margin-top:0.75rem">
       <button class="btn btn-sm" onclick="reset2048()">New Game</button>
       <button class="btn btn-sm btn-ghost" id="aiBtn" onclick="toggleAI2048()">▶ AI Play</button>
@@ -866,6 +927,35 @@ document.addEventListener('keydown', e => {
   if(map[e.key]!==undefined) { e.preventDefault(); move2048(map[e.key]); }
 });
 
+// Touch swipe support for 2048
+(function() {
+  let sx, sy;
+  const board = document.getElementById('board2048');
+  if (!board) return;
+  board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+  board.addEventListener('touchend', e => {
+    if (aiRunning) return;
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
+    if(Math.abs(dx)>Math.abs(dy)) move2048(dx<0?0:1);
+    else move2048(dy<0?2:3);
+  }, {passive:true});
+})();
+
+// Touch swipe support for Maze
+(function() {
+  let sx, sy;
+  const cvs = document.getElementById('mazeCanvas');
+  if (!cvs) return;
+  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener('touchend', e => {
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<15&&Math.abs(dy)<15) return;
+    if(Math.abs(dx)>Math.abs(dy)) movePlayer(dx<0?-1:1, 0);
+    else movePlayer(0, dy<0?-1:1);
+  }, {passive:true});
+})();
+
 reset2048();
 
 // ======================== RPS ========================
@@ -1039,6 +1129,20 @@ document.addEventListener('keydown', e => {
   const map={ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1}};
   if(map[e.key]) { e.preventDefault(); snakeDir(map[e.key].x, map[e.key].y); }
 });
+
+// Touch swipe support for Snake canvas
+(function() {
+  let sx, sy;
+  const cvs = document.getElementById('snakeCanvas');
+  if (!cvs) return;
+  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener('touchend', e => {
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<15&&Math.abs(dy)<15) return;
+    if(Math.abs(dx)>Math.abs(dy)) snakeDir(dx<0?-1:1, 0);
+    else snakeDir(0, dy<0?-1:1);
+  }, {passive:true});
+})();
 
 resetSnake();
 </script>
