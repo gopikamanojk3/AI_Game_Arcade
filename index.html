@@ -321,61 +321,59 @@
     color: #c084fc;
   }
 
-  /* ===== MOBILE / TOUCH IMPROVEMENTS ===== */
-
-  /* Prevent tap highlight flicker */
+  /* ===== GLOBAL TOUCH & UX ===== */
   * { -webkit-tap-highlight-color: transparent; }
-
-  /* Prevent text selection on game buttons */
   button, .ttt-cell, .rps-btn { user-select: none; -webkit-user-select: none; }
 
-  /* Larger touch targets for all buttons */
-  .btn { min-height: 44px; padding: 10px 18px; font-size: 14px; }
-  .btn-sm { min-height: 40px; padding: 8px 14px; font-size: 13px; }
+  /* ===== DESKTOP LAYOUT — centred max-width container ===== */
+  .arcade { max-width: 640px; margin: 0 auto; }
 
-  /* Bigger D-pad buttons for thumb use */
-  .d-btn { width: 52px; height: 52px; font-size: 20px; border-radius: 10px; }
-  .snake-controls { grid-template-columns: repeat(3, 52px); gap: 6px; width: 168px; }
+  /* Nav tabs — no overflow needed on desktop, wrap gracefully */
+  .nav-tabs { padding: 1rem 1.25rem 0; gap: 6px; flex-wrap: nowrap; }
+  .nav-tab { min-width: 80px; min-height: 52px; font-size: 11px; }
+  .nav-tab .tab-icon { font-size: 17px; }
 
-  /* Nav tabs: scroll horizontally on tiny screens, bigger tap area */
-  .nav-tab { min-height: 56px; padding: 8px 4px; font-size: 10px; }
-  .nav-tab .tab-icon { font-size: 18px; }
+  /* Game panels comfortable on desktop */
+  .game-panel { padding: 1.5rem; }
 
-  /* TicTacToe board — full width on phones */
-  .ttt-board { max-width: 100%; }
-  .ttt-cell { font-size: clamp(24px, 10vw, 40px); border-radius: 12px; }
+  /* Boards centred with sensible max */
+  .ttt-board { max-width: 320px; }
+  .ttt-cell { font-size: clamp(24px, 8vw, 40px); }
+  .game2048-board { max-width: 340px; }
+  .tile { font-size: clamp(13px, 3.5vw, 20px); }
+  #mazeCanvas, #snakeCanvas { max-width: 420px; image-rendering: auto; }
 
-  /* 2048 board — full width on phones */
-  .game2048-board { max-width: 100%; }
-  .tile { font-size: clamp(12px, 4vw, 18px); border-radius: 8px; }
+  /* Buttons — comfortable on all sizes */
+  .btn { min-height: 40px; padding: 9px 20px; font-size: 14px; }
+  .btn-sm { min-height: 36px; padding: 7px 14px; font-size: 13px; }
 
-  /* RPS buttons — larger emoji, better touch area */
-  .rps-btn { font-size: clamp(28px, 12vw, 44px); border-radius: 16px; min-height: 80px; }
-  .rps-arena { font-size: clamp(36px, 14vw, 56px); }
+  /* D-pad */
+  .d-btn { width: 50px; height: 50px; font-size: 20px; border-radius: 10px; }
+  .snake-controls { grid-template-columns: repeat(3, 50px); gap: 6px; width: 162px; }
 
-  /* Canvases — full width */
-  #mazeCanvas, #snakeCanvas { max-width: 100%; }
+  /* RPS */
+  .rps-btn { font-size: clamp(28px, 8vw, 44px); min-height: 72px; }
+  .rps-arena { font-size: clamp(36px, 10vw, 56px); }
 
-  /* Score values — readable on small screens */
-  .score-val { font-size: clamp(16px, 5vw, 22px); }
+  /* Score */
+  .score-val { font-size: clamp(16px, 4vw, 22px); }
 
-  /* Game panel padding tighter on small screens */
-  @media (max-width: 400px) {
-    .game-panel { padding: 1rem 0.75rem; }
-    .arcade-title { font-size: 18px; letter-spacing: 2px; }
-    .arcade-header { padding: 1rem 0.75rem 0.75rem; }
-    .nav-tab { font-size: 9px; min-width: 60px; }
+  /* Swipe hint */
+  .swipe-hint { font-size: 11px; color: #4a3a6e; text-align: center; margin-top: 0.4rem; }
+
+  /* ===== MOBILE overrides ===== */
+  @media (max-width: 480px) {
+    .arcade-title { font-size: 17px; letter-spacing: 2px; }
+    .arcade-header { padding: 0.9rem 1rem 0.7rem; }
+    .game-panel { padding: 1rem 0.85rem; }
+    .nav-tabs { padding: 0.75rem 0.5rem 0; gap: 3px; overflow-x: auto; flex-wrap: nowrap; }
+    .nav-tab { min-width: 62px; font-size: 9.5px; min-height: 54px; padding: 6px 4px; }
+    .ttt-board { max-width: 100%; }
+    .game2048-board { max-width: 100%; }
+    #mazeCanvas, #snakeCanvas { max-width: 100%; }
     .rps-choices { gap: 6px; }
     .score-display { gap: 6px; }
     .diff-toggle { flex-wrap: wrap; }
-  }
-
-  /* 2048 swipe controls hint on mobile */
-  .swipe-hint {
-    font-size: 11px;
-    color: #4a3a6e;
-    text-align: center;
-    margin-top: 0.4rem;
   }
 </style>
 
@@ -442,7 +440,7 @@
       <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter</span></b> — it uses BFS to chase you through the maze every time you move!</div>
       <div class="tip">💡 Click <b>Show BFS Path</b> to see exactly where the hunter is heading.</div>
     </details>
-    <canvas id="mazeCanvas" width="320" height="320"></canvas>
+    <canvas id="mazeCanvas"></canvas>
     <div class="status-bar" id="maze-status">Arrow keys / WASD to move. Hunter uses BFS!</div>
     <div style="display:flex;gap:8px;margin-bottom:0.75rem">
       <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
@@ -524,7 +522,7 @@
       <div class="tip"><b>Goal:</b> Eat as many <span style="color:#34d399">green apples</span> as possible without hitting a wall or your own tail!</div>
       <div class="tip">💡 The AI uses greedy best-first search — it always moves toward food but can trap itself.</div>
     </details>
-    <canvas id="snakeCanvas" width="320" height="320"></canvas>
+    <canvas id="snakeCanvas"></canvas>
     <div class="status-bar" id="snake-status">Press Start to watch AI snake hunt food!</div>
     <div style="display:flex;gap:8px;margin-bottom:1rem">
       <button class="btn btn-sm" id="snakeBtn" onclick="toggleSnake()">▶ Start AI</button>
@@ -668,6 +666,12 @@ let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = []
 function initMaze() {
   mazeGrid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
   generateMaze(0, 0);
+  // Recursive backtracker only carves even coords, so (COLS-1, ROWS-1) = (15,15)
+  // is always a wall. Force it open and connect it to the maze.
+  mazeGrid[ROWS-1][COLS-1] = 1;
+  if (!mazeGrid[ROWS-1][COLS-2] && !mazeGrid[ROWS-2][COLS-1]) {
+    mazeGrid[ROWS-1][COLS-2] = 1; // punch a passage from the left
+  }
   playerPos = {x:0, y:0};
   // Start hunter far away in the bottom-right quadrant
   const candidates = [];
@@ -714,33 +718,45 @@ function drawMaze() {
   const canvas = document.getElementById('mazeCanvas');
   if (!canvas || !mazeGrid) return;
   const ctx = canvas.getContext('2d');
-  const cw = canvas.clientWidth || 320;
-  canvas.width = COLS * CS;
-  canvas.height = ROWS * CS;
+  // Use actual display size for crisp rendering on all screens
+  const dpr = window.devicePixelRatio || 1;
+  const displaySize = canvas.parentElement
+    ? Math.min(canvas.parentElement.clientWidth - 32, 360)
+    : 320;
+  const size = Math.max(displaySize, 160);
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  ctx.scale(dpr, dpr);
+  const cs = size / COLS; // dynamic cell size
   ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  for (let y=0;y<ROWS;y++) for (let x=0;x<COLS;x++) {
+  ctx.fillRect(0, 0, size, size);
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
     if (mazeGrid[y][x]) {
       ctx.fillStyle = '#1a1428';
-      ctx.fillRect(x*CS,y*CS,CS,CS);
+      ctx.fillRect(x*cs, y*cs, cs, cs);
     }
   }
   if (showPath && bfsPath.length) {
-    ctx.fillStyle = 'rgba(124,58,237,0.3)';
-    for (const {x,y} of bfsPath) ctx.fillRect(x*CS+2,y*CS+2,CS-4,CS-4);
+    ctx.fillStyle = 'rgba(124,58,237,0.35)';
+    for (const {x,y} of bfsPath) ctx.fillRect(x*cs+1, y*cs+1, cs-2, cs-2);
   }
   // goal
+  const gpad = cs * 0.2;
   ctx.fillStyle = '#34d399';
-  ctx.fillRect((COLS-1)*CS+4,(ROWS-1)*CS+4,CS-8,CS-8);
+  ctx.beginPath();
+  ctx.roundRect((COLS-1)*cs+gpad, (ROWS-1)*cs+gpad, cs-gpad*2, cs-gpad*2, 3);
+  ctx.fill();
   // player
   ctx.fillStyle = '#c084fc';
   ctx.beginPath();
-  ctx.arc(playerPos.x*CS+CS/2, playerPos.y*CS+CS/2, CS/2-2, 0, Math.PI*2);
+  ctx.arc(playerPos.x*cs+cs/2, playerPos.y*cs+cs/2, cs/2-1, 0, Math.PI*2);
   ctx.fill();
   // hunter
   ctx.fillStyle = '#f87171';
   ctx.beginPath();
-  ctx.arc(hunterPos.x*CS+CS/2, hunterPos.y*CS+CS/2, CS/2-3, 0, Math.PI*2);
+  ctx.arc(hunterPos.x*cs+cs/2, hunterPos.y*cs+cs/2, cs/2-2, 0, Math.PI*2);
   ctx.fill();
 }
 
@@ -792,7 +808,7 @@ function reset2048() {
   score2048v = 0;
   addTile(); addTile();
   render2048();
-  document.getElementById('status2048').textContent = 'Use arrow keys to play · or let AI play!';
+  document.getElementById('status2048').textContent = 'Use arrow keys or swipe · or let AI play!';
 }
 
 function addTile() {
@@ -844,69 +860,84 @@ function move2048(dir) {
 }
 
 function heuristic2048(b) {
-  let score=0, empty=0, mono=0, smooth=0;
-  const w=[[15,14,13,12],[8,9,10,11],[7,6,5,4],[0,1,2,3]];
+  // Snake-pattern weight matrix: highest tile to top-left corner
+  const w=[[7,6,5,4],[6,5,4,3],[5,4,3,2],[4,3,2,1]];
+  let score=0, empty=0, smooth=0, mono=0;
   for(let r=0;r<4;r++) for(let c=0;c<4;c++) {
-    if(!b[r][c]) empty++; else score+=b[r][c]*w[r][c];
+    if(!b[r][c]) { empty++; continue; }
+    score += b[r][c] * w[r][c];
+    if(c<3 && b[r][c+1]) smooth -= Math.abs(Math.log2(b[r][c]) - Math.log2(b[r][c+1]));
+    if(r<3 && b[r+1][c]) smooth -= Math.abs(Math.log2(b[r][c]) - Math.log2(b[r+1][c]));
+    if(c<3) mono += b[r][c] >= b[r][c+1] ? (b[r][c+1] ? Math.log2(b[r][c+1]) : 0) : 0;
+    if(r<3) mono += b[r][c] >= b[r+1][c] ? (b[r+1][c] ? Math.log2(b[r+1][c]) : 0) : 0;
   }
-  for(let r=0;r<4;r++) {
-    for(let c=0;c<3;c++) {
-      if(b[r][c]&&b[r][c+1]) smooth-=Math.abs(Math.log2(b[r][c])-Math.log2(b[r][c+1]));
-      if(b[r][c]>=b[r][c+1]) mono+=b[r][c+1]?Math.log2(b[r][c+1]):0;
-    }
-  }
-  return score + empty*50 + smooth*10 + mono*5;
+  return score + empty*100 + smooth*6 + mono*2;
 }
 
 function copyBoard(b) { return b.map(r=>[...r]); }
 
-function expectimax(b, depth, isMax) {
-  if (depth===0) return heuristic2048(b);
-  const empty=[];
-  for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(!b[r][c]) empty.push([r,c]);
-  if (!isMax) {
-    if (!empty.length) return heuristic2048(b);
-    let sum=0;
-    const sample = empty.length>4 ? empty.sort(()=>Math.random()-.5).slice(0,4) : empty;
-    for(const [r,c] of sample) {
-      for(const v of [2,4]) {
-        const nb=copyBoard(b); nb[r][c]=v;
-        sum += (v===2?0.9:0.1)*expectimax(nb,depth-1,true);
-      }
+// Pure slide — never touches globals, returns {board, pts, moved}
+function slideBoard(b, dir) {
+  let board = copyBoard(b);
+  let pts = 0, moved = false;
+  const rotated = dir===2||dir===3;
+  const reversed = dir===1||dir===3;
+  if(rotated) board = board[0].map((_,c)=>board.map(r=>r[c]));
+  for(let i=0;i<4;i++){
+    let row = board[i].filter(x=>x);
+    if(reversed) row.reverse();
+    for(let j=0;j<row.length-1;j++){
+      if(row[j]===row[j+1]){ row[j]*=2; pts+=row[j]; row.splice(j+1,1); j++; }
     }
-    return sum/(sample.length*2);
-  } else {
+    while(row.length<4) row.push(0);
+    if(reversed) row.reverse();
+    if(row.join()!==board[i].join()) moved=true;
+    board[i]=row;
+  }
+  if(rotated) board = board[0].map((_,c)=>board.map(r=>r[c]));
+  return {board, pts, moved};
+}
+
+function expectimax(b, depth, isMax) {
+  if(depth===0) return heuristic2048(b);
+  if(isMax){
     let best=-Infinity;
-    for(let dir=0;dir<4;dir++) {
-      const nb=copyBoard(b); const sb={board2048:nb, score2048v};
-      const savedB=board2048, savedS=score2048v;
-      board2048=nb; score2048v=savedS;
-      const moved=move2048(dir);
-      const newB=copyBoard(board2048);
-      board2048=savedB; score2048v=savedS;
-      if(moved) best=Math.max(best, expectimax(newB, depth-1, false));
+    for(let dir=0;dir<4;dir++){
+      const {board:nb, moved} = slideBoard(b, dir);
+      if(moved) best=Math.max(best, expectimax(nb, depth-1, false));
     }
     return best===-Infinity ? heuristic2048(b) : best;
+  } else {
+    const empty=[];
+    for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(!b[r][c]) empty.push([r,c]);
+    if(!empty.length) return heuristic2048(b);
+    const sample = empty.length>4 ? empty.sort(()=>Math.random()-.5).slice(0,4) : empty;
+    let sum=0;
+    for(const [r,c] of sample){
+      for(const [v,p] of [[2,0.9],[4,0.1]]){
+        const nb=copyBoard(b); nb[r][c]=v;
+        sum += p * expectimax(nb, depth-1, true);
+      }
+    }
+    return sum / sample.length;
   }
 }
 
 function aiMove2048() {
   let best=-Infinity, bestDir=0;
-  for(let dir=0;dir<4;dir++) {
-    const nb=copyBoard(board2048), savedB=board2048, savedS=score2048v;
-    board2048=nb; score2048v=savedS;
-    const moved=move2048(dir);
-    const newB=copyBoard(board2048);
-    board2048=savedB; score2048v=savedS;
-    if(moved) {
-      const v=expectimax(newB,2,false);
-      if(v>best) { best=v; bestDir=dir; }
+  for(let dir=0;dir<4;dir++){
+    const {board:nb, moved} = slideBoard(board2048, dir);
+    if(moved){
+      const v = expectimax(nb, 3, false);
+      if(v>best){ best=v; bestDir=dir; }
     }
   }
-  const ok=move2048(bestDir);
-  document.getElementById('status2048').textContent = `AI playing... score: ${score2048v}`;
-  if(!ok||!board2048.flat().some((_,i,a)=>{ const r=Math.floor(i/4),c=i%4; return !a[i]||( c<3&&a[i]===a[r*4+c+1])||(r<3&&a[i]===a[(r+1)*4+c]); })) {
-    toggleAI2048(); document.getElementById('status2048').textContent = 'Game over! Score: '+score2048v; }
+  move2048(bestDir);
+  document.getElementById('status2048').textContent = `🤖 AI playing… score: ${score2048v}`;
+  // Check game over
+  let canMove=false;
+  for(let dir=0;dir<4;dir++) if(slideBoard(board2048,dir).moved){ canMove=true; break; }
+  if(!canMove){ toggleAI2048(); document.getElementById('status2048').textContent='Game over! Score: '+score2048v; }
 }
 
 function toggleAI2048() {
@@ -1061,18 +1092,57 @@ function snakeDir(dx,dy) {
   if(snakeRunning) btn.textContent='⏸ Stop (Manual)';
 }
 
-function greedySnakeMove() {
-  const head=snake[0];
-  const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
-  let best=null, bestDist=Infinity;
-  for(const d of dirs) {
-    const nx=head.x+d.x, ny=head.y+d.y;
-    if(nx<0||nx>=SCOLS||ny<0||ny>=SROWS) continue;
-    if(snake.some(s=>s.x===nx&&s.y===ny)) continue;
-    const dist=Math.abs(nx-snakeFood.x)+Math.abs(ny-snakeFood.y);
-    if(dist<bestDist) { bestDist=dist; best=d; }
+function floodFill(head, body) {
+  // Count reachable cells from head (excluding body)
+  const visited = new Set(body.map(s=>`${s.x},${s.y}`));
+  const queue = [head];
+  visited.add(`${head.x},${head.y}`);
+  let count = 0;
+  while(queue.length) {
+    const {x,y} = queue.shift();
+    count++;
+    for(const {x:dx,y:dy} of [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]) {
+      const nx=x+dx, ny=y+dy, k=`${nx},${ny}`;
+      if(nx>=0&&nx<SCOLS&&ny>=0&&ny<SROWS&&!visited.has(k)) {
+        visited.add(k); queue.push({x:nx,y:ny});
+      }
+    }
   }
-  return best || dirs.find(d=>{ const nx=head.x+d.x,ny=head.y+d.y; return nx>=0&&nx<SCOLS&&ny>=0&&ny<SROWS&&!snake.some(s=>s.x===nx&&s.y===ny); }) || snakeDir2;
+  return count;
+}
+
+function greedySnakeMove() {
+  const head = snake[0];
+  const dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+  // Filter to valid (non-wall, non-self) moves
+  const valid = dirs.filter(d => {
+    const nx=head.x+d.x, ny=head.y+d.y;
+    return nx>=0&&nx<SCOLS&&ny>=0&&ny<SROWS&&!snake.some(s=>s.x===nx&&s.y===ny);
+  });
+  if(!valid.length) return snakeDir2;
+  // Score each direction: prefer toward food, but reject moves that trap us
+  let best=null, bestScore=-Infinity;
+  for(const d of valid) {
+    const nx=head.x+d.x, ny=head.y+d.y;
+    const dist = Math.abs(nx-snakeFood.x)+Math.abs(ny-snakeFood.y);
+    // Flood-fill from this next cell (pretend we moved there; tail will have moved too)
+    const futureBody = snake.slice(0,-1); // tail disappears this step
+    const space = floodFill({x:nx,y:ny}, futureBody);
+    // Reject moves that leave fewer cells than our snake length (we'll trap ourselves)
+    if(space < snake.length * 0.5) continue; // too risky
+    const score = space * 3 - dist; // prioritise open space, then closeness to food
+    if(score > bestScore) { bestScore=score; best=d; }
+  }
+  // If all moves are risky, just pick the one with most open space
+  if(!best) {
+    let maxSpace=-1;
+    for(const d of valid) {
+      const nx=head.x+d.x, ny=head.y+d.y;
+      const space = floodFill({x:nx,y:ny}, snake.slice(0,-1));
+      if(space>maxSpace){ maxSpace=space; best=d; }
+    }
+  }
+  return best || snakeDir2;
 }
 
 function stepSnake() {
@@ -1099,20 +1169,30 @@ function stepSnake() {
 function drawSnake() {
   const canvas=document.getElementById('snakeCanvas');
   if(!canvas||!snake) return;
-  canvas.width=SCOLS*SCS; canvas.height=SROWS*SCS;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#0a0a0f'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const dpr = window.devicePixelRatio || 1;
+  const displaySize = canvas.parentElement
+    ? Math.min(canvas.parentElement.clientWidth - 32, 360)
+    : 320;
+  const size = Math.max(displaySize, 160);
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const cs = size / SCOLS;
+  ctx.fillStyle='#0a0a0f'; ctx.fillRect(0,0,size,size);
   // grid
   ctx.strokeStyle='#12101e'; ctx.lineWidth=0.5;
-  for(let i=0;i<=SCOLS;i++) { ctx.beginPath();ctx.moveTo(i*SCS,0);ctx.lineTo(i*SCS,SROWS*SCS);ctx.stroke(); }
-  for(let i=0;i<=SROWS;i++) { ctx.beginPath();ctx.moveTo(0,i*SCS);ctx.lineTo(SCOLS*SCS,i*SCS);ctx.stroke(); }
+  for(let i=0;i<=SCOLS;i++) { ctx.beginPath();ctx.moveTo(i*cs,0);ctx.lineTo(i*cs,SROWS*cs);ctx.stroke(); }
+  for(let i=0;i<=SROWS;i++) { ctx.beginPath();ctx.moveTo(0,i*cs);ctx.lineTo(SCOLS*cs,i*cs);ctx.stroke(); }
   // food
   ctx.fillStyle='#34d399';
-  ctx.beginPath();ctx.arc(snakeFood.x*SCS+SCS/2,snakeFood.y*SCS+SCS/2,SCS/2-2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(snakeFood.x*cs+cs/2,snakeFood.y*cs+cs/2,cs/2-1,0,Math.PI*2);ctx.fill();
   // snake
   snake.forEach((s,i) => {
     ctx.fillStyle = i===0 ? '#c084fc' : `rgba(124,58,237,${Math.max(0.3,1-i/snake.length*0.7)})`;
-    ctx.beginPath();ctx.roundRect(s.x*SCS+1,s.y*SCS+1,SCS-2,SCS-2,4);ctx.fill();
+    ctx.beginPath();ctx.roundRect(s.x*cs+1,s.y*cs+1,cs-2,cs-2,3);ctx.fill();
   });
 }
 
@@ -1143,6 +1223,12 @@ document.addEventListener('keydown', e => {
     else snakeDir(0, dy<0?-1:1);
   }, {passive:true});
 })();
+
+// Redraw canvases on resize / orientation change
+window.addEventListener('resize', () => {
+  if (document.getElementById('panel-maze').classList.contains('active')) drawMaze();
+  if (document.getElementById('panel-snake').classList.contains('active')) drawSnake();
+});
 
 resetSnake();
 </script>
