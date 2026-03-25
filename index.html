@@ -1,7 +1,4 @@
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
 
@@ -46,7 +43,6 @@
     background: #0d0d1a;
     overflow-x: auto;
     border-bottom: 1px solid #1e1535;
-    -webkit-overflow-scrolling: touch;
   }
 
   .nav-tab {
@@ -80,12 +76,8 @@
   .nav-tab .tab-unit { font-size: 9px; color: #4a3a6e; display: block; margin-top: 2px; }
   .nav-tab.active .tab-unit { color: #7c3aed; }
 
-  .game-panel { display: none; padding: 1.25rem; max-width: 560px; margin: 0 auto; }
+  .game-panel { display: none; padding: 1.25rem; }
   .game-panel.active { display: block; }
-
-  #mazeCanvas, #snakeCanvas { width: 100%; max-width: 340px; height: auto; }
-  .game2048-board { max-width: 320px; margin: 0 auto 1rem; }
-  .ttt-board { max-width: 280px; margin: 0 auto 1rem; }
 
   .ai-badge {
     display: inline-flex;
@@ -325,63 +317,6 @@
     font-size: 10px;
     color: #c084fc;
   }
-
-  /* ===== MOBILE / TOUCH IMPROVEMENTS ===== */
-
-  /* Prevent tap highlight flicker */
-  * { -webkit-tap-highlight-color: transparent; }
-
-  /* Prevent text selection on game buttons */
-  button, .ttt-cell, .rps-btn { user-select: none; -webkit-user-select: none; }
-
-  /* Larger touch targets for all buttons */
-  .btn { min-height: 44px; padding: 10px 18px; font-size: 14px; }
-  .btn-sm { min-height: 40px; padding: 8px 14px; font-size: 13px; }
-
-  /* Bigger D-pad buttons for thumb use */
-  .d-btn { width: 52px; height: 52px; font-size: 20px; border-radius: 10px; }
-  .snake-controls { grid-template-columns: repeat(3, 52px); gap: 6px; width: 168px; }
-
-  /* Nav tabs: scroll horizontally on tiny screens, bigger tap area */
-  .nav-tab { min-height: 56px; padding: 8px 4px; font-size: 10px; }
-  .nav-tab .tab-icon { font-size: 18px; }
-
-  /* TicTacToe board — full width on phones */
-  .ttt-board { max-width: 100%; }
-  .ttt-cell { font-size: clamp(24px, 10vw, 40px); border-radius: 12px; }
-
-  /* 2048 board — full width on phones */
-  .game2048-board { max-width: 100%; }
-  .tile { font-size: clamp(12px, 4vw, 18px); border-radius: 8px; }
-
-  /* RPS buttons — larger emoji, better touch area */
-  .rps-btn { font-size: clamp(28px, 12vw, 44px); border-radius: 16px; min-height: 80px; }
-  .rps-arena { font-size: clamp(36px, 14vw, 56px); }
-
-  /* Canvases — full width */
-  #mazeCanvas, #snakeCanvas { max-width: 100%; }
-
-  /* Score values — readable on small screens */
-  .score-val { font-size: clamp(16px, 5vw, 22px); }
-
-  /* Game panel padding tighter on small screens */
-  @media (max-width: 400px) {
-    .game-panel { padding: 1rem 0.75rem; }
-    .arcade-title { font-size: 18px; letter-spacing: 2px; }
-    .arcade-header { padding: 1rem 0.75rem 0.75rem; }
-    .nav-tab { font-size: 9px; min-width: 60px; }
-    .rps-choices { gap: 6px; }
-    .score-display { gap: 6px; }
-    .diff-toggle { flex-wrap: wrap; }
-  }
-
-  /* 2048 swipe controls hint on mobile */
-  .swipe-hint {
-    font-size: 11px;
-    color: #4a3a6e;
-    text-align: center;
-    margin-top: 0.4rem;
-  }
 </style>
 
 <div class="arcade">
@@ -439,24 +374,19 @@
 
   <!-- MAZE -->
   <div class="game-panel" id="panel-maze">
-    <div class="ai-badge">BFS Pathfinding — Hunter Chase</div>
+    <div class="ai-badge">BFS Pathfinding — Optimal Pursuit</div>
     <details class="how-to-play" open>
       <summary>📖 How to Play</summary>
-      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">green square</span> in the bottom-right corner without getting caught.</div>
+      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">green square</span> in the bottom-right corner.</div>
       <div class="tip"><b>You are the <span style="color:#c084fc">purple circle</span>.</b> Move with <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys or <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>. On mobile, use the D-pad buttons.</div>
-      <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter(s)</span></b> — they use BFS to chase you!</div>
-      <div class="tip">💡 <b>Easy:</b> 1 hunter. <b>Hard:</b> 2 hunters. Use <b>Show Goal Path</b> for hints to find your way.</div>
+      <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter</span></b> — it uses BFS to chase you through the maze every time you move!</div>
+      <div class="tip">💡 Click <b>Show BFS Path</b> to see exactly where the hunter is heading.</div>
     </details>
-    <div class="diff-toggle" style="margin-bottom:1rem">
-      <button class="btn btn-sm" id="btn-easy" onclick="setMazeDiff('easy')">Easy</button>
-      <button class="btn btn-sm" id="btn-hard" onclick="setMazeDiff('hard')">Hard</button>
-    </div>
     <canvas id="mazeCanvas" width="320" height="320"></canvas>
     <div class="status-bar" id="maze-status">Arrow keys / WASD to move. Hunter uses BFS!</div>
     <div style="display:flex;gap:8px;margin-bottom:0.75rem">
       <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
       <button class="btn btn-sm btn-ghost" onclick="toggleMazePath()">Show BFS Path</button>
-      <button class="btn btn-sm btn-ghost" onclick="toggleMazeGoalPath()">Show Goal Path</button>
     </div>
     <div class="snake-controls" style="margin:0 auto 0.5rem">
       <div></div><button class="d-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
@@ -481,8 +411,7 @@
       <div class="score-box"><div class="score-label">Best</div><div class="score-val" id="best2048">0</div></div>
     </div>
     <div class="game2048-board" id="board2048"></div>
-    <div class="status-bar" id="status2048">Use arrow keys or swipe to play · or let AI play!</div>
-    <div class="swipe-hint">📱 Swipe on the board to move tiles</div>
+    <div class="status-bar" id="status2048">Use arrow keys to play · or let AI play!</div>
     <div style="display:flex;gap:8px;margin-top:0.75rem">
       <button class="btn btn-sm" onclick="reset2048()">New Game</button>
       <button class="btn btn-sm btn-ghost" id="aiBtn" onclick="toggleAI2048()">▶ AI Play</button>
@@ -673,35 +602,21 @@ initTTT();
 
 // ======================== MAZE ========================
 const COLS = 16, ROWS = 16, CS = 20;
-let mazeGrid, playerPos, hunters = [], mazeGoal, mazeInterval, showPath = false, bfsPath = [], difficulty = 'easy', showGoalPath = false, goalPath = [];
+let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [];
 
 function initMaze() {
-  mazeGoal = {x:COLS-2, y:ROWS-2};
   mazeGrid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
   generateMaze(0, 0);
-  addMazeLoops(100); // Add extra loops for multiple paths
-  mazeGrid[mazeGoal.y][mazeGoal.x] = 1;
   playerPos = {x:0, y:0};
-  // Place hunters
-  hunters = [];
-  const numHunters = difficulty === 'hard' ? 2 : 1;
-  const quadrants = [
-    {minX: Math.floor(COLS/2), maxX: COLS-1, minY: Math.floor(ROWS/2), maxY: ROWS-1}, // bottom-right
-    {minX: 0, maxX: Math.floor(COLS/2)-1, minY: Math.floor(ROWS/2), maxY: ROWS-1}, // bottom-left
-  ];
-  for (let i = 0; i < numHunters; i++) {
-    const q = quadrants[i % quadrants.length];
-    const candidates = [];
-    for (let y = q.minY; y <= q.maxY; y++)
-      for (let x = q.minX; x <= q.maxX; x++)
-        if (mazeGrid[y][x] && !(x === mazeGoal.x && y === mazeGoal.y) && !(x === playerPos.x && y === playerPos.y)) candidates.push({x,y});
-    const pos = candidates[Math.floor(Math.random() * candidates.length)] || {x: COLS-4, y: ROWS-4};
-    hunters.push(pos);
-  }
-  bfsPath = bfs(hunters[0], playerPos); // for display
-  goalPath = bfs(playerPos, mazeGoal); // for hint
+  // Start hunter far away in the bottom-right quadrant
+  const candidates = [];
+  for (let y = Math.floor(ROWS/2); y < ROWS; y++)
+    for (let x = Math.floor(COLS/2); x < COLS; x++)
+      if (mazeGrid[y][x] && !(x===COLS-1&&y===ROWS-1)) candidates.push({x,y});
+  hunterPos = candidates[Math.floor(Math.random()*candidates.length)] || {x:COLS-2, y:ROWS-2};
+  bfsPath = bfs(hunterPos, playerPos);
   drawMaze();
-  document.getElementById('maze-status').textContent = `🟣 You = purple · 🔴 Hunter${numHunters > 1 ? 's' : ''} = red · 🟢 Goal = bottom-right · ${difficulty.toUpperCase()} mode`;
+  document.getElementById('maze-status').textContent = '🟣 You = purple · 🔴 Hunter = red · 🟢 Goal = green corner';
 }
 
 function generateMaze(x, y) {
@@ -712,19 +627,6 @@ function generateMaze(x, y) {
     if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&!mazeGrid[ny][nx]) {
       mazeGrid[y+dy/2][x+dx/2] = 1;
       generateMaze(nx, ny);
-    }
-  }
-}
-
-function addMazeLoops(extra = 20) {
-  for (let i = 0; i < extra; i++) {
-    const x = Math.floor(Math.random() * (COLS - 1)) * 2 + 1;
-    const y = Math.floor(Math.random() * (ROWS - 1)) * 2 + 1;
-    const dirs = [{dx:2,dy:0},{dx:-2,dy:0},{dx:0,dy:2},{dx:0,dy:-2}];
-    const {dx, dy} = dirs[Math.floor(Math.random() * dirs.length)];
-    const nx = x + dx, ny = y + dy;
-    if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && mazeGrid[ny][nx] === 0) {
-      mazeGrid[y + dy/2][x + dx/2] = 1;
     }
   }
 }
@@ -766,72 +668,46 @@ function drawMaze() {
     ctx.fillStyle = 'rgba(124,58,237,0.3)';
     for (const {x,y} of bfsPath) ctx.fillRect(x*CS+2,y*CS+2,CS-4,CS-4);
   }
-  if (showGoalPath && goalPath.length) {
-    ctx.fillStyle = 'rgba(52,211,153,0.4)';
-    for (const {x,y} of goalPath) ctx.fillRect(x*CS+2,y*CS+2,CS-4,CS-4);
-  }
   // goal
   ctx.fillStyle = '#34d399';
-  ctx.beginPath();
-  ctx.arc(mazeGoal.x*CS+CS/2, mazeGoal.y*CS+CS/2, CS/2-3, 0, Math.PI*2);
-  ctx.fill();
+  ctx.fillRect((COLS-1)*CS+4,(ROWS-1)*CS+4,CS-8,CS-8);
   // player
   ctx.fillStyle = '#c084fc';
   ctx.beginPath();
   ctx.arc(playerPos.x*CS+CS/2, playerPos.y*CS+CS/2, CS/2-2, 0, Math.PI*2);
   ctx.fill();
-  // hunters
+  // hunter
   ctx.fillStyle = '#f87171';
-  hunters.forEach(h => {
-    ctx.beginPath();
-    ctx.arc(h.x*CS+CS/2, h.y*CS+CS/2, CS/2-3, 0, Math.PI*2);
-    ctx.fill();
-  });
+  ctx.beginPath();
+  ctx.arc(hunterPos.x*CS+CS/2, hunterPos.y*CS+CS/2, CS/2-3, 0, Math.PI*2);
+  ctx.fill();
 }
 
 function movePlayer(dx, dy) {
-  const nx = playerPos.x + dx, ny = playerPos.y + dy;
-  if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || !mazeGrid[ny][nx]) return;
-  playerPos = {x: nx, y: ny};
-  // Check win
-  if (playerPos.x === mazeGoal.x && playerPos.y === mazeGoal.y) {
+  const nx = playerPos.x+dx, ny = playerPos.y+dy;
+  if (nx<0||nx>=COLS||ny<0||ny>=ROWS||!mazeGrid[ny][nx]) return;
+  playerPos = {x:nx, y:ny};
+  if (playerPos.x===COLS-1&&playerPos.y===ROWS-1) {
     document.getElementById('maze-status').textContent = '🎉 You escaped! New maze incoming...';
     setTimeout(initMaze, 1200);
     return;
   }
-  // Move hunters
-  hunters.forEach((h, i) => {
-    const path = bfs(h, playerPos);
-    if (path.length > 1) hunters[i] = path[1];
-  });
-  // Check lose
-  if (hunters.some(h => h.x === playerPos.x && h.y === playerPos.y)) {
+  bfsPath = bfs(hunterPos, playerPos);
+  if (bfsPath.length > 1) hunterPos = bfsPath[1];
+  if (hunterPos.x===playerPos.x&&hunterPos.y===playerPos.y) {
     document.getElementById('maze-status').textContent = '💀 Caught! Click New Maze to try again.';
-    drawMaze();
-    return;
+    drawMaze(); return;
   }
-  // Update status
-  const closestDist = Math.min(...hunters.map(h => bfs(h, playerPos).length));
-  const warn = closestDist <= 3 ? ' ⚠️ Hunter is close!' : '';
-  document.getElementById('maze-status').textContent = `Hunter${hunters.length > 1 ? 's' : ''} ${closestDist} steps away${warn}`;
-  bfsPath = bfs(hunters[0], playerPos); // for display
-  goalPath = bfs(playerPos, mazeGoal); // update hint path
+  const dist = bfsPath.length;
+  const warn = dist <= 3 ? ' ⚠️ Hunter is close!' : '';
+  document.getElementById('maze-status').textContent = `Hunter is ${dist} steps away${warn}`;
   drawMaze();
 }
 
-function setMazeDiff(diff) {
-  difficulty = diff;
-  document.getElementById('btn-easy').style.background = diff === 'easy' ? '#4c1d95' : '#6d28d9';
-  document.getElementById('btn-easy').style.borderColor = diff === 'easy' ? '#7c3aed' : '#c084fc';
-  document.getElementById('btn-hard').style.background = diff === 'hard' ? '#4c1d95' : '#6d28d9';
-  document.getElementById('btn-hard').style.borderColor = diff === 'hard' ? '#7c3aed' : '#c084fc';
-  initMaze();
-}
-
-function toggleMazeGoalPath() {
-  showGoalPath = !showGoalPath;
-  const btn = document.querySelector('#panel-maze .btn-ghost[onclick*="toggleMazeGoalPath"]');
-  if (btn) btn.textContent = showGoalPath ? '🔵 Hide Goal Path' : 'Show Goal Path';
+function toggleMazePath() {
+  showPath = !showPath;
+  const btn = document.querySelector('#panel-maze .btn-ghost');
+  if (btn) btn.textContent = showPath ? '🔵 Hide BFS Path' : 'Show BFS Path';
   drawMaze();
 }
 
@@ -845,9 +721,6 @@ document.addEventListener('keydown', e => {
 });
 
 initMaze();
-
-// Initialize maze difficulty buttons
-setMazeDiff('easy');
 
 // ======================== 2048 ========================
 let board2048, score2048v = 0, best2048v = 0, aiInterval2048 = null, aiRunning = false;
@@ -993,42 +866,13 @@ document.addEventListener('keydown', e => {
   if(map[e.key]!==undefined) { e.preventDefault(); move2048(map[e.key]); }
 });
 
-// Touch swipe support for 2048
-(function() {
-  let sx, sy;
-  const board = document.getElementById('board2048');
-  if (!board) return;
-  board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
-  board.addEventListener('touchend', e => {
-    if (aiRunning) return;
-    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
-    if(Math.abs(dx)>Math.abs(dy)) move2048(dx<0?0:1);
-    else move2048(dy<0?2:3);
-  }, {passive:true});
-})();
-
-// Touch swipe support for Maze
-(function() {
-  let sx, sy;
-  const cvs = document.getElementById('mazeCanvas');
-  if (!cvs) return;
-  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
-  cvs.addEventListener('touchend', e => {
-    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<15&&Math.abs(dy)<15) return;
-    if(Math.abs(dx)>Math.abs(dy)) movePlayer(dx<0?-1:1, 0);
-    else movePlayer(0, dy<0?-1:1);
-  }, {passive:true});
-})();
-
 reset2048();
 
 // ======================== RPS ========================
 let rpsHistory=[], rpsScores={you:0,ai:0,tie:0};
-var rpsEmoji={R:'✊',P:'✋',S:'✌️'};
-var rpsBeats={R:'P',P:'S',S:'R'};
-var rpsNames={R:'Rock',P:'Paper',S:'Scissors'};
+const rpsEmoji={R:'✊',P:'✋',S:'✌️'};
+const rpsBeats={R:'P',P:'S',S:'R'};
+const rpsNames={R:'Rock',P:'Paper',S:'Scissors'};
 
 function playRPS(choice) {
   rpsHistory.push(choice);
@@ -1038,8 +882,8 @@ function playRPS(choice) {
   document.getElementById('rps-ai').textContent = rpsEmoji[ai];
   let result;
   if(you===ai) { result='🤝 Draw!'; rpsScores.tie++; }
-  else if(ai === rpsBeats[you]) { result='🤖 AI wins!'; rpsScores.ai++; }
-  else { result='🎉 You win!'; rpsScores.you++; }
+  else if(rpsBeats[you]===ai) { result='🎉 You win!'; rpsScores.you++; }
+  else { result='🤖 AI wins!'; rpsScores.ai++; }
   document.getElementById('rps-status').textContent = `${result} You: ${rpsNames[you]}, AI: ${rpsNames[ai]}`;
   document.getElementById('rps-yw').textContent = rpsScores.you;
   document.getElementById('rps-aw').textContent = rpsScores.ai;
@@ -1064,15 +908,9 @@ function predictRPS() {
   if(pattern3[last2]&&pattern3[last2].length) {
     const freq={R:0,P:0,S:0};
     pattern3[last2].forEach(c=>freq[c]++);
-    predicted = 'R';
-    let max = freq['R'];
-    if (freq['P'] > max) { max = freq['P']; predicted = 'P'; }
-    if (freq['S'] > max) { max = freq['S']; predicted = 'S'; }
+    predicted = Object.keys(freq).reduce((a,b)=>freq[a]>=freq[b]?a:b);
   } else {
-    predicted = 'R';
-    let max = counts['R'];
-    if (counts['P'] > max) { max = counts['P']; predicted = 'P'; }
-    if (counts['S'] > max) { max = counts['S']; predicted = 'S'; }
+    predicted = Object.keys(counts).reduce((a,b)=>counts[a]>=counts[b]?a:b);
   }
   return rpsBeats[predicted];
 }
@@ -1202,22 +1040,5 @@ document.addEventListener('keydown', e => {
   if(map[e.key]) { e.preventDefault(); snakeDir(map[e.key].x, map[e.key].y); }
 });
 
-// Touch swipe support for Snake canvas
-(function() {
-  let sx, sy;
-  const cvs = document.getElementById('snakeCanvas');
-  if (!cvs) return;
-  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
-  cvs.addEventListener('touchend', e => {
-    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<15&&Math.abs(dy)<15) return;
-    if(Math.abs(dx)>Math.abs(dy)) snakeDir(dx<0?-1:1, 0);
-    else snakeDir(0, dy<0?-1:1);
-  }, {passive:true});
-})();
-
 resetSnake();
-
-// Initialize RPS
-resetRPS();
 </script>
