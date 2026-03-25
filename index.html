@@ -377,6 +377,36 @@
     text-align: center;
     margin-top: 0.4rem;
   }
+
+  /* Responsive improvements for phone and laptop */
+  @media (max-width: 1024px) {
+    .arcade { padding: 0.5rem; }
+    .arcade-header { padding: 1rem 0.8rem 0.75rem; }
+    .arcade-title { font-size: clamp(16px, 5vw, 20px); letter-spacing: 2px; }
+    .arcade-sub { font-size: 10px; }
+    .nav-tabs { gap: 2px; padding: 0.6rem 0.5rem 0; }
+    .nav-tab { flex: 0 0 auto; min-width: 70px; padding: 7px 5px; font-size: 9px; }
+    .game-panel { padding: 0.9rem; }
+    .status-bar { font-size: 11px; padding: 8px 12px; min-height: 34px; }
+    .btn { min-height: 42px; padding: 9px 14px; font-size: 13px; }
+    .btn-sm { min-height: 38px; padding: 6px 10px; font-size: 11px; }
+    .ttt-board { max-width: 100%; gap: 5px; }
+    .ttt-cell { font-size: clamp(20px, 8vw, 34px); }
+    #mazeCanvas, #snakeCanvas { max-width: 100%; height: auto; }
+    .maze-controls { max-width: 98%; gap: 5px; }
+    .snake-controls { grid-template-columns: repeat(3, 46px); gap: 4px; width: 150px; }
+    .d-btn { width: 46px; height: 46px; font-size: 18px; }
+    .game2048-board { max-width: 100%; gap: 6px; padding: 8px; }
+    .tile { font-size: clamp(12px, 4vw, 18px); }
+    .rps-btn { min-height: 70px; font-size: clamp(24px, 10vw, 40px); }
+  }
+
+  @media (min-width: 1025px) {
+    .arcade { max-width: 1100px; margin: 0 auto; }
+    .game-panel { padding: 1.5rem 2rem; }
+    .maze-canvas-wrapper { max-width: 600px; }
+    #mazeCanvas, #snakeCanvas { max-width: 100%; height: auto; }
+  }
 </style>
 
 <div class="arcade">
