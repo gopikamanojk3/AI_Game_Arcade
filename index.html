@@ -1,215 +1,1433 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Game Arcade</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #faf8ef;
-            padding: 20px;
-        }
-        h1 {
-            color: #776e65;
-        }
-        .game-container {
-            margin: 20px;
-            padding: 20px;
-            border: 2px solid #bbada0;
-            border-radius: 10px;
-            background: #bbada0;
-        }
-        #game2048 {
-            display: grid;
-            grid-template-columns: repeat(4, 80px);
-            grid-template-rows: repeat(4, 80px);
-            gap: 10px;
-            background: #bbada0;
-            padding: 10px;
-            border-radius: 6px;
-        }
-        .tile {
-            background: #cdc1b4;
-            border-radius: 3px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 35px;
-            color: #776e65;
-            user-select: none;
-            transition: all 0.15s ease-in-out;
-        }
-        .tile.tile-2 { background: #eee4da; color: #776e65; }
-        .tile.tile-4 { background: #ede0c8; color: #776e65; }
-        .tile.tile-8 { background: #f2b179; color: #f9f6f2; }
-        .tile.tile-16 { background: #f59563; color: #f9f6f2; }
-        .tile.tile-32 { background: #f67c5f; color: #f9f6f2; }
-        .tile.tile-64 { background: #f65e3b; color: #f9f6f2; }
-        .tile.tile-128 { background: #edcf72; color: #095f6b; font-size: 30px; }
-        .tile.tile-256 { background: #edcc61; color: #095f6b; font-size: 30px; }
-        .tile.tile-512 { background: #edc850; color: #095f6b; font-size: 30px; }
-        .tile.tile-1024 { background: #edc53f; color: #095f6b; font-size: 25px; }
-        .tile.tile-2048 { background: #edc22e; color: #095f6b; font-size: 25px; }
-        .controls {
-            margin-top: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            background: #8f7a66;
-            color: #f9f6f2;
-            border: none;
-            border-radius: 3px;
-        }
-        button:hover {
-            background: #9f8a76;
-        }
-        .score {
-            font-size: 20px;
-            color: #776e65;
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <h1>Welcome to AI Game Arcade</h1>
-    <div class="game-container">
-        <h2>2048 Game</h2>
-        <div class="score">Score: <span id="score">0</span></div>
-        <div id="game2048"></div>
-        <div class="controls">
-            <button onclick="newGame()">New Game</button>
-            <p style="color: #776e65; font-size: 14px;">Use arrow keys to play</p>
-        </div>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>html,body{background:#0a0a0f;margin:0;padding:0;}</style>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  * { -webkit-tap-highlight-color: transparent; }
+  button { cursor: pointer; font-family: inherit; }
+  button, .ttt-cell, .rps-btn { user-select: none; -webkit-user-select: none; }
+
+  /* ── CSS Variables ── */
+  :root {
+    --bg:        #0a0a0f;
+    --bg2:       #0d0d1a;
+    --bg3:       #12101e;
+    --bg4:       #1e1535;
+    --border:    #2a1f4a;
+    --border2:   #1e1535;
+    --purple:    #c084fc;
+    --purple2:   #a78bfa;
+    --purple3:   #7c3aed;
+    --purple4:   #4c1d95;
+    --purple5:   #6d28d9;
+    --green:     #34d399;
+    --red:       #f87171;
+    --text:      #e8e6f0;
+    --muted:     #6b5a8e;
+    --muted2:    #4a3a6e;
+    --panel-w:   100%;
+    --max-w:     560px;
+  }
+
+  /* ── Page shell ── */
+  html, body { 
+    background: var(--bg); 
+    min-height: 100vh; 
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .arcade {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .arcade-header {
+    background: linear-gradient(135deg, var(--bg2) 0%, #1a0d2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem 1rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .arcade-title {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(16px, 5vw, 24px);
+    font-weight: 700;
+    color: var(--purple);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .arcade-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── Nav tabs ── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0.75rem 0.75rem 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    flex-shrink: 0;
+    min-width: 80px;
+    padding: 8px 6px 7px;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: var(--bg3);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .nav-tab:hover  { background: var(--bg4); color: var(--purple2); }
+  .nav-tab.active { background: var(--bg); color: var(--purple); border-color: var(--purple3); border-bottom: 1px solid var(--bg); }
+  .nav-tab .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+  .nav-tab .tab-unit { font-size: 9px; color: var(--muted2); display: block; margin-top: 2px; }
+  .nav-tab.active .tab-unit { color: var(--purple3); }
+
+  /* ── Game panel ── */
+  .game-panel { 
+    display: none; 
+    padding: 1.25rem 1.25rem 2rem; 
+    flex: 1;
+    overflow-y: auto;
+  }
+  .game-panel.active { display: flex; flex-direction: column; }
+
+  /* ── AI badge ── */
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1e0f35;
+    border: 1px solid var(--purple4);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--purple2);
+    margin-bottom: 1rem;
+    font-family: 'Space Mono', monospace;
+    width: fit-content;
+  }
+  .ai-badge::before { content: "◆"; font-size: 8px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--purple4);
+    border: 1px solid var(--purple3);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s;
+    min-height: 38px;
+  }
+  .btn:hover  { background: var(--purple5); }
+  .btn:active { transform: scale(0.97); }
+  .btn-sm     { padding: 7px 14px; font-size: 12px; min-height: 34px; }
+  .btn-ghost  { background: transparent; border-color: var(--border); color: var(--muted); }
+  .btn-ghost:hover { background: var(--bg4); border-color: var(--purple3); color: var(--purple2); }
+
+  /* ── Status bar ── */
+  .status-bar {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--purple2);
+    margin-bottom: 1rem;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    line-height: 1.4;
+  }
+
+  /* ── How to Play ── */
+  .how-to-play {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    font-size: 12px;
+    color: #9d8fc0;
+    line-height: 1.7;
+  }
+  .how-to-play summary {
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--purple2);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .how-to-play summary::-webkit-details-marker { display: none; }
+  .how-to-play summary::before { content: "▶"; font-size: 9px; transition: transform 0.2s; }
+  .how-to-play[open] summary::before { transform: rotate(90deg); }
+  .how-to-play .tip { margin-top: 8px; }
+  .how-to-play .tip b { color: var(--purple); }
+
+  .key {
+    display: inline-block;
+    background: var(--bg4);
+    border: 1px solid var(--muted2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+  }
+
+  /* ── Diff toggle row ── */
+  .diff-toggle { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+
+  /* ── Score display ── */
+  .score-display { display: flex; gap: 10px; margin-bottom: 1rem; }
+  .score-box {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .score-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .score-val   { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--purple); font-weight: 700; line-height: 1.2; margin-top: 2px; }
+
+  /* ── TicTacToe ── */
+  .ttt-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 1.25rem;
+  }
+  .ttt-cell {
+    aspect-ratio: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .ttt-cell:hover:not(.taken) { background: var(--bg4); border-color: var(--purple3); }
+  .ttt-cell.x   { color: var(--purple); }
+  .ttt-cell.o   { color: var(--green); }
+  .ttt-cell.win { background: #1e0f35; border-color: var(--purple); }
+
+  /* ── Canvas games (maze + snake) ── */
+  #mazeCanvas, #snakeCanvas {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 1rem;
+    image-rendering: auto;
+    touch-action: none;
+  }
+
+  /* Maze container with controls */
+  .maze-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .maze-canvas-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #mazeCanvas {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 10px;
+    margin: 0;
+  }
+
+  .maze-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .maze-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--purple2);
+    font-size: clamp(16px, 5vw, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .maze-btn:active { background: var(--border); transform: scale(0.95); }
+
+  /* D-pad */
+  .snake-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin: 0 auto 0.75rem;
+    max-width: 200px;
+    width: 100%;
+  }
+  .d-btn {
+    aspect-ratio: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--purple2);
+    font-size: clamp(18px, 5vw, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .d-btn:hover  { background: var(--bg4); }
+  .d-btn:active { background: var(--border); transform: scale(0.93); }
+
+  /* ── 2048 ── */
+  .game2048-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 1rem;
+    background: var(--bg3);
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .tile {
+    aspect-ratio: 1;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: clamp(12px, 3.5vw, 20px);
+    transition: background 0.1s;
+  }
+  .tile-0    { background: var(--bg4); }
+  .tile-2    { background: #1e2235; color: #93c5fd; }
+  .tile-4    { background: #1e2b35; color: #6ee7b7; }
+  .tile-8    { background: #2a1f35; color: var(--purple); }
+  .tile-16   { background: #2a2a35; color: #fbbf24; }
+  .tile-32   { background: #351e1e; color: var(--red); }
+  .tile-64   { background: #3a1e1e; color: #fb923c; }
+  .tile-128  { background: #4a2a1e; color: #fde68a; }
+  .tile-256  { background: #5a2a1e; color: #fde68a; }
+  .tile-512  { background: #6a1e1e; color: #fff; }
+  .tile-1024 { background: #7c1e1e; color: #fff; font-size: clamp(10px, 2.5vw, 14px); }
+  .tile-2048 { background: var(--purple); color: #fff; font-size: clamp(10px, 2.5vw, 14px); }
+  .swipe-hint { font-size: 11px; color: var(--muted2); text-align: center; margin-top: 0.5rem; }
+
+  /* ── RPS ── */
+  .rps-choices { display: flex; gap: 12px; margin-bottom: 1rem; }
+  .rps-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-height: 120px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: clamp(28px, 8vw, 46px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .rps-btn:hover  { background: var(--bg4); border-color: var(--purple3); transform: scale(1.05); }
+  .rps-btn:active { transform: scale(0.95); }
+  .rps-arena {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    font-size: clamp(36px, 10vw, 56px);
+    margin: 0.75rem 0;
+    min-height: 72px;
+  }
+  .rps-vs { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+  .rps-freq { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 12px; margin-bottom: 1rem; }
+  .freq-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+  .freq-bar { flex: 1; height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+  .freq-fill { height: 100%; background: var(--purple3); border-radius: 3px; transition: width 0.3s; }
+
+  /* ── Responsive ── */
+  @media (min-width: 480px) {
+    .arcade-title { font-size: 22px; }
+    .arcade-header { padding: 1.4rem 1.8rem 1.1rem; }
+    .game-panel { padding: 1.4rem 1.6rem 2.2rem; }
+    .nav-tab { min-width: 90px; font-size: 12px; padding: 9px 7px 8px; }
+    .nav-tab .tab-icon { font-size: 17px; }
+    .ttt-board { max-width: 320px; gap: 10px; }
+    .ttt-cell { font-size: 40px; border-radius: 14px; }
+    .game2048-board { max-width: 360px; gap: 8px; padding: 12px; }
+    .score-val { font-size: 22px; }
+    .status-bar { font-size: 12px; padding: 10px 16px; }
+    .btn { padding: 10px 20px; font-size: 13px; }
+    .btn-sm { padding: 8px 16px; font-size: 12px; }
+    .maze-controls { max-width: 220px; }
+    .rps-btn { max-height: 130px; }
+  }
+
+  @media (min-width: 600px) {
+    .arcade-title { font-size: 24px; }
+    .arcade-header { padding: 1.5rem 2rem 1.2rem; }
+    .game-panel { padding: 1.5rem 1.75rem 2.5rem; }
+    .nav-tab { min-width: 100px; font-size: 12px; padding: 10px 8px 8px; }
+    .nav-tab .tab-icon { font-size: 18px; }
+    .ttt-board { max-width: 340px; gap: 11px; }
+    .ttt-cell { font-size: 44px; border-radius: 15px; }
+    .game2048-board { max-width: 380px; gap: 9px; padding: 13px; }
+    .score-val { font-size: 24px; }
+    .status-bar { font-size: 12px; padding: 11px 16px; }
+    .btn { padding: 11px 22px; font-size: 14px; }
+    .btn-sm { padding: 8px 16px; font-size: 13px; }
+    .maze-controls { max-width: 240px; }
+    .d-btn { grid-template-columns: repeat(3, 60px); }
+    .rps-btn { max-height: 150px; }
+  }
+
+  /* Phone: extra tight */
+  @media (max-width: 360px) {
+    .arcade-title { font-size: 14px; letter-spacing: 2px; }
+    .arcade-header { padding: 0.8rem 0.9rem 0.6rem; }
+    .game-panel { padding: 0.8rem 0.8rem 1.2rem; }
+    .nav-tabs { gap: 2px; padding: 0.5rem 0.3rem 0; }
+    .nav-tab { min-width: 50px; font-size: 8px; padding: 6px 2px 5px; }
+    .score-display { gap: 5px; }
+    .diff-toggle { gap: 5px; }
+    .rps-choices { gap: 6px; }
+    .btn-sm { padding: 5px 8px; font-size: 10px; }
+    .maze-controls { max-width: 160px; gap: 6px; }
+  }
+</style>
+
+<div class="arcade">
+  <div class="arcade-header">
+    <div class="arcade-title">⬡ AI Game Arcade</div>
+    <div class="arcade-sub">5 Games · 3 AI Units · Classic Algorithms</div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showGame('ttt', this)">
+      <span class="tab-icon">✕○</span>
+      Tic-Tac-Toe
+      <span class="tab-unit">Minimax</span>
+    </button>
+    <button class="nav-tab" onclick="showGame('maze', this)">
+      <span class="tab-icon">◈</span>
+      Maze Chase
+      <span class="tab-unit">BFS</span>
+    </button>
+    <button class="nav-tab" onclick="showGame('g2048', this)">
+      <span class="tab-icon">⊞</span>
+      2048 AI
+      <span class="tab-unit">Expectimax</span>
+    </button>
+    <button class="nav-tab" onclick="showGame('rps', this)">
+      <span class="tab-icon">✊</span>
+      RPS AI
+      <span class="tab-unit">Pattern</span>
+    </button>
+    <button class="nav-tab" onclick="showGame('snake', this)">
+      <span class="tab-icon">⟆</span>
+      Snake AI
+      <span class="tab-unit">Greedy</span>
+    </button>
+  </div>
+
+  <!-- TIC TAC TOE -->
+  <div class="game-panel active" id="panel-ttt">
+    <div class="ai-badge">Minimax Algorithm — Perfect Play</div>
+    <details class="how-to-play" open>
+      <summary>📖 How to Play</summary>
+      <div class="tip"><b>Goal:</b> Get 3 of your symbols in a row — horizontally, vertically, or diagonally.</div>
+      <div class="tip"><b>You are X</b>, the AI is O. <b>Tap any empty square</b> to place your move.</div>
+      <div class="tip"><b>Easy:</b> AI plays randomly — beatable! &nbsp; <b>Hard:</b> AI uses Minimax — plays perfectly.</div>
+      <div class="tip">💡 On Hard, the best you can do is a draw. Try to force one!</div>
+    </details>
+    <div class="diff-toggle">
+      <button class="btn btn-sm" id="btn-easy" onclick="setDiff('easy')">Easy</button>
+      <button class="btn btn-sm" id="btn-hard" onclick="setDiff('hard')" style="background:#6d28d9;border-color:#c084fc">Hard</button>
+      <button class="btn btn-sm btn-ghost" onclick="resetTTT()" style="margin-left:auto">New Game</button>
     </div>
+    <div class="ttt-board" id="ttt-board"></div>
+    <div class="status-bar" id="ttt-status">Your turn (X)</div>
+  </div>
 
-    <script>
-        const gridSize = 4;
-        let board = [];
-        let score = 0;
+  <!-- MAZE -->
+  <div class="game-panel" id="panel-maze">
+    <div class="ai-badge">Breadth-First Search Pathfinding</div>
+    <details class="how-to-play" open>
+      <summary>📖 How to Play</summary>
+      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">green square</span> in the bottom-right corner!</div>
+      <div class="tip"><b>Move:</b> Use <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys, WASD, or tap the arrow buttons below.</div>
+      <div class="tip"><b>Avoid the red hunter!</b> The AI uses BFS to chase you. Keep your distance!</div>
+      <div class="tip">💡 <b>Tip:</b> The hunter moves slower than you — use this to your advantage!</div>
+    </details>
+    <div class="maze-container">
+      <div class="maze-canvas-wrapper">
+        <canvas id="mazeCanvas"></canvas>
+      </div>
+      <div class="status-bar" id="maze-status">🟣 You (purple) · 🔴 Hunter (red) · 🟢 Goal (green)</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
+        <button class="btn btn-sm" id="mazeAutoBtn" onclick="toggleMazeAuto()">▶ Auto Run</button>
+        <button class="btn btn-sm btn-ghost maze-path-btn" onclick="cycleMazePath()">Path 1</button>
+        <button class="btn btn-sm btn-ghost" id="mazeShowPathBtn" onclick="toggleMazePath()">Show Paths</button>
+      </div>
+      <div class="maze-controls">
+        <div></div><button class="maze-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
+        <button class="maze-btn" onclick="movePlayer(-1,0)">←</button>
+        <button class="maze-btn" onclick="movePlayer(1,0)">→</button>
+        <div></div><button class="maze-btn" onclick="movePlayer(0,1)">↓</button><div></div>
+      </div>
+    </div>
+  </div>
 
-        function initBoard() {
-            board = Array(gridSize).fill(null).map(() => Array(gridSize).fill(0));
-            score = 0;
-            addNewTile();
-            addNewTile();
-            render();
-        }
+  <!-- 2048 -->
+  <div class="game-panel" id="panel-g2048">
+    <div class="ai-badge">Expectimax Game Tree Search</div>
+    <details class="how-to-play" open>
+      <summary>📖 How to Play</summary>
+      <div class="tip"><b>Goal:</b> Combine tiles to reach <b>2048</b>!</div>
+      <div class="tip"><b>Move:</b> Use arrow keys or swipe to slide all tiles in a direction.</div>
+      <div class="tip"><b>Combine:</b> Two tiles with the same number merge into one with double the value.</div>
+      <div class="tip">💡 Let the AI play or take control yourself — click buttons to switch!</div>
+    </details>
+    <div class="score-display">
+      <div class="score-box"><div class="score-label">Score</div><div class="score-val" id="score2048">0</div></div>
+      <div class="score-box"><div class="score-label">Best</div><div class="score-val" id="best2048">0</div></div>
+    </div>
+    <div class="diff-toggle">
+      <button class="btn btn-sm" id="aiToggle2048" onclick="toggleAI2048()">▶ Let AI Play</button>
+      <button class="btn btn-sm btn-ghost" onclick="reset2048()" style="margin-left:auto">Reset</button>
+    </div>
+    <div class="game2048-board" id="board2048"></div>
+    <div class="status-bar" id="status2048">Use arrow keys or swipe · or let AI play!</div>
+    <div class="swipe-hint">← Swipe on mobile →</div>
+  </div>
 
-        function addNewTile() {
-            const emptyCells = [];
-            for (let i = 0; i < gridSize; i++) {
-                for (let j = 0; j < gridSize; j++) {
-                    if (board[i][j] === 0) {
-                        emptyCells.push({ x: i, y: j });
-                    }
-                }
-            }
-            if (emptyCells.length > 0) {
-                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                board[randomCell.x][randomCell.y] = Math.random() < 0.9 ? 2 : 4;
-            }
-        }
+  <!-- RPS -->
+  <div class="game-panel" id="panel-rps">
+    <div class="ai-badge">Pattern Recognition AI</div>
+    <details class="how-to-play" open>
+      <summary>📖 How to Play</summary>
+      <div class="tip"><b>Goal:</b> Beat the AI at Rock, Paper, Scissors!</div>
+      <div class="tip"><b>Click a button:</b> ✊ Rock, ✋ Paper, or ✌️ Scissors.</div>
+      <div class="tip"><b>The AI learns:</b> It analyzes your patterns to predict your next move.</div>
+      <div class="tip">💡 Can you beat a mind-reading AI? Try to keep it guessing!</div>
+    </details>
+    <div class="rps-choices">
+      <button class="rps-btn" onclick="playRPS('R')" title="Rock">✊</button>
+      <button class="rps-btn" onclick="playRPS('P')" title="Paper">✋</button>
+      <button class="rps-btn" onclick="playRPS('S')" title="Scissors">✌️</button>
+    </div>
+    <div class="rps-arena" id="rps-arena">
+      <span id="rps-you">❓</span><span class="rps-vs">VS</span><span id="rps-ai">🤖</span>
+    </div>
+    <div class="status-bar" id="rps-status">Choose your move!</div>
+    <div class="score-display" style="margin-top:0.75rem">
+      <div class="score-box"><div class="score-label">You</div><div class="score-val" id="rps-yw">0</div></div>
+      <div class="score-box"><div class="score-label">AI</div><div class="score-val" id="rps-aw">0</div></div>
+      <div class="score-box"><div class="score-label">Ties</div><div class="score-val" id="rps-tie">0</div></div>
+    </div>
+    <div style="margin-top:0.5rem">
+      <button class="btn btn-sm btn-ghost" onclick="resetRPS()">Reset Scores</button>
+    </div>
+  </div>
 
-        function render() {
-            const gameDiv = document.getElementById('game2048');
-            gameDiv.innerHTML = '';
-            for (let i = 0; i < gridSize; i++) {
-                for (let j = 0; j < gridSize; j++) {
-                    const value = board[i][j];
-                    const tile = document.createElement('div');
-                    tile.className = 'tile' + (value > 0 ? ' tile-' + value : '');
-                    tile.textContent = value > 0 ? value : '';
-                    gameDiv.appendChild(tile);
-                }
-            }
-            document.getElementById('score').textContent = score;
-        }
+  <!-- SNAKE -->
+  <div class="game-panel" id="panel-snake">
+    <div class="ai-badge">Greedy Best-First Food Chasing</div>
+    <details class="how-to-play" open>
+      <summary>📖 How to Play</summary>
+      <div class="tip"><b>Watch mode:</b> Click <b>▶ Start AI</b> to watch the AI snake hunt food automatically.</div>
+      <div class="tip"><b>Play yourself:</b> While running, use <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> or the D-pad buttons below to take over steering.</div>
+      <div class="tip"><b>Goal:</b> Eat as many <span style="color:#34d399">green apples</span> as possible without hitting a wall or your own tail!</div>
+      <div class="tip">💡 The AI uses greedy best-first search — it always moves toward food but can trap itself.</div>
+    </details>
+    <canvas id="snakeCanvas"></canvas>
+    <div class="status-bar" id="snake-status">Press Start to watch AI snake hunt food!</div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem">
+      <button class="btn btn-sm" id="snakeBtn" onclick="toggleSnake()">▶ Start AI</button>
+      <button class="btn btn-sm btn-ghost" onclick="resetSnake()">Reset</button>
+    </div>
+    <div class="snake-controls">
+      <div></div><button class="d-btn" onclick="snakeDir(0,-1)">↑</button><div></div>
+      <button class="d-btn" onclick="snakeDir(-1,0)">←</button>
+      <button class="d-btn" onclick="snakeDir(1,0)">→</button>
+      <div></div><button class="d-btn" onclick="snakeDir(0,1)">↓</button><div></div>
+    </div>
+    <div style="font-size:11px;color:#4a3a6e;text-align:center">You can also control manually with arrow keys</div>
+  </div>
+</div>
 
-        function move(direction) {
-            let moved = false;
-            const newBoard = board.map(row => [...row]);
+<script>
+// ======================== NAVIGATION ========================
+function showGame(id, tab) {
+  document.querySelectorAll('.game-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (tab) tab.classList.add('active');
+  if (id === 'maze') { setTimeout(() => drawMaze(), 50); }
+  if (id === 'snake') { setTimeout(() => drawSnake(), 50); }
+  if (id === 'g2048') { setTimeout(() => render2048(), 50); }
+}
 
-            if (direction === 'left' || direction === 'right') {
-                for (let i = 0; i < gridSize; i++) {
-                    const row = direction === 'left' ? newBoard[i] : newBoard[i].reverse();
-                    const result = slideAndMerge(row);
-                    if (!arraysEqual(row, result)) moved = true;
-                    newBoard[i] = direction === 'left' ? result : result.reverse();
-                }
-            } else {
-                for (let j = 0; j < gridSize; j++) {
-                    let column = newBoard.map(row => row[j]);
-                    const result = slideAndMerge(direction === 'up' ? column : column.reverse());
-                    if (!arraysEqual(column, result)) moved = true;
-                    const newColumn = direction === 'up' ? result : result.reverse();
-                    for (let i = 0; i < gridSize; i++) {
-                        newBoard[i][j] = newColumn[i];
-                    }
-                }
-            }
+// ======================== TIC-TAC-TOE ========================
+let tttBoard, tttDiff = 'hard', tttGame = true;
 
-            if (moved) {
-                board = newBoard;
-                addNewTile();
-                render();
-                if (isGameOver()) {
-                    setTimeout(() => alert('Game Over! Final Score: ' + score), 200);
-                }
-            }
-        }
+function initTTT() {
+  tttBoard = Array(9).fill('');
+  tttGame = true;
+  const b = document.getElementById('ttt-board');
+  b.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const c = document.createElement('div');
+    c.className = 'ttt-cell';
+    c.onclick = () => tttClick(i);
+    b.appendChild(c);
+  }
+  document.getElementById('ttt-status').textContent = 'Your turn (X)';
+}
 
-        function slideAndMerge(array) {
-            let arr = array.filter(val => val !== 0);
-            for (let i = 0; i < arr.length - 1; i++) {
-                if (arr[i] === arr[i + 1]) {
-                    arr[i] *= 2;
-                    score += arr[i];
-                    arr.splice(i + 1, 1);
-                }
-            }
-            while (arr.length < gridSize) {
-                arr.push(0);
-            }
-            return arr;
-        }
+function setDiff(d) {
+  tttDiff = d;
+  document.getElementById('btn-easy').style.background = d === 'easy' ? '#6d28d9' : '#4c1d95';
+  document.getElementById('btn-easy').style.borderColor = d === 'easy' ? '#c084fc' : '#7c3aed';
+  document.getElementById('btn-hard').style.background = d === 'hard' ? '#6d28d9' : '#4c1d95';
+  document.getElementById('btn-hard').style.borderColor = d === 'hard' ? '#c084fc' : '#7c3aed';
+  resetTTT();
+}
 
-        function arraysEqual(a, b) {
-            return a.length === b.length && a.every((val, idx) => val === b[idx]);
-        }
+function resetTTT() { initTTT(); }
 
-        function isGameOver() {
-            // Check if any moves are possible
-            for (let i = 0; i < gridSize; i++) {
-                for (let j = 0; j < gridSize; j++) {
-                    if (board[i][j] === 0) return false;
-                    if (j < gridSize - 1 && board[i][j] === board[i][j + 1]) return false;
-                    if (i < gridSize - 1 && board[i][j] === board[i + 1][j]) return false;
-                }
-            }
-            return true;
-        }
+function tttClick(i) {
+  if (!tttGame || tttBoard[i]) return;
+  tttBoard[i] = 'X';
+  renderTTT();
+  const w = checkWin(tttBoard);
+  if (w) { endTTT(w === 'X' ? '🎉 You win!' : '🤖 AI wins!', w); return; }
+  if (tttBoard.every(c => c)) { endTTT("It's a draw!"); return; }
+  document.getElementById('ttt-status').textContent = '🤖 AI thinking...';
+  setTimeout(() => {
+    const move = tttDiff === 'hard' ? bestMove() : randomMove();
+    tttBoard[move] = 'O';
+    renderTTT();
+    const w2 = checkWin(tttBoard);
+    if (w2) { endTTT('🤖 AI wins!', w2); return; }
+    if (tttBoard.every(c => c)) { endTTT("It's a draw!"); return; }
+    document.getElementById('ttt-status').textContent = 'Your turn (X)';
+  }, 300);
+}
 
-        function newGame() {
-            initBoard();
-        }
+function randomMove() {
+  const avail = tttBoard.map((v,i)=>v?-1:i).filter(i=>i>=0);
+  return avail[Math.floor(Math.random()*avail.length)];
+}
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp') { e.preventDefault(); move('up'); }
-            else if (e.key === 'ArrowDown') { e.preventDefault(); move('down'); }
-            else if (e.key === 'ArrowLeft') { e.preventDefault(); move('left'); }
-            else if (e.key === 'ArrowRight') { e.preventDefault(); move('right'); }
-        });
+function renderTTT() {
+  const cells = document.querySelectorAll('.ttt-cell');
+  tttBoard.forEach((v,i) => {
+    cells[i].textContent = v;
+    cells[i].className = 'ttt-cell' + (v ? ' taken ' + v.toLowerCase() : '');
+  });
+}
 
-        // Initialize game on page load
-        initBoard();
-    </script>
-</body>
-</html>
+function checkWin(b) {
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (const [a,c,d] of lines) if (b[a] && b[a]===b[c] && b[a]===b[d]) return b[a];
+  return null;
+}
+
+function endTTT(msg, winner) {
+  tttGame = false;
+  document.getElementById('ttt-status').textContent = msg;
+  if (winner) {
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    const cells = document.querySelectorAll('.ttt-cell');
+    for (const [a,c,d] of lines) if (tttBoard[a]===winner && tttBoard[a]===tttBoard[c] && tttBoard[a]===tttBoard[d]) {
+      [a,c,d].forEach(i => cells[i].classList.add('win'));
+    }
+  }
+}
+
+function minimax(b, isMax, depth) {
+  const w = checkWin(b);
+  if (w === 'O') return 10 - depth;
+  if (w === 'X') return depth - 10;
+  if (b.every(c => c)) return 0;
+  const avail = b.map((v,i)=>v?-1:i).filter(i=>i>=0);
+  if (isMax) {
+    let best = -Infinity;
+    for (const i of avail) { b[i]='O'; best=Math.max(best,minimax(b,false,depth+1)); b[i]=''; }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const i of avail) { b[i]='X'; best=Math.min(best,minimax(b,true,depth+1)); b[i]=''; }
+    return best;
+  }
+}
+
+function bestMove() {
+  let best = -Infinity, move = -1;
+  for (let i = 0; i < 9; i++) {
+    if (!tttBoard[i]) {
+      tttBoard[i] = 'O';
+      const v = minimax(tttBoard, false, 0);
+      tttBoard[i] = '';
+      if (v > best) { best = v; move = i; }
+    }
+  }
+  return move;
+}
+
+initTTT();
+
+// ======================== MAZE ========================
+const COLS = 16, ROWS = 16;
+let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [], goalPath = [], mazePaths = [], selectedPathIndex = 0, mazeLocked = false, playerStepCount = 0, mazeAiRunning = false, mazeAiInterval = null;
+
+function addMazeLoops(extra=24) {
+  let attempts = 0;
+  while (extra > 0 && attempts < 400) {
+    attempts++;
+    const x = Math.floor(Math.random() * (COLS - 2)) + 1;
+    const y = Math.floor(Math.random() * (ROWS - 2)) + 1;
+    if (mazeGrid[y][x]) continue;
+    const openCount = [
+      mazeGrid[y-1][x],
+      mazeGrid[y+1][x],
+      mazeGrid[y][x-1],
+      mazeGrid[y][x+1]
+    ].filter(Boolean).length;
+    if (openCount >= 2) {
+      mazeGrid[y][x] = 1;
+      extra--;
+    }
+  }
+}
+
+function initMaze() {
+  mazeLocked = false;
+  playerStepCount = 0;
+  if (mazeAiRunning) {
+    mazeAiRunning = false;
+    clearInterval(mazeAiInterval);
+    mazeAiInterval = null;
+    const autoBtn = document.getElementById('mazeAutoBtn');
+    if (autoBtn) autoBtn.textContent = '▶ Auto Run';
+  }
+  mazeGrid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+  generateMaze(0, 0);
+  addMazeLoops(28);
+  mazeGrid[ROWS-1][COLS-1] = 1;
+  if (!mazeGrid[ROWS-1][COLS-2] && !mazeGrid[ROWS-2][COLS-1]) {
+    mazeGrid[ROWS-1][COLS-2] = 1;
+  }
+  playerPos = {x:0, y:0};
+  
+  // FIXED: Spawn hunter at a significant distance from player
+  const candidates = [];
+  for (let y = Math.floor(ROWS/2); y < ROWS; y++)
+    for (let x = Math.floor(COLS/2); x < COLS; x++)
+      if (mazeGrid[y][x] && !(x===COLS-1&&y===ROWS-1)) candidates.push({x,y});
+  hunterPos = candidates[Math.floor(Math.random()*candidates.length)] || {x:COLS-2, y:ROWS-2};
+  bfsPath = bfs(hunterPos, playerPos);
+  buildMazePaths();
+  drawMaze();
+  setMazeStatus();
+}
+
+function generateMaze(x, y) {
+  mazeGrid[y][x] = 1;
+  const dirs = [{dx:2,dy:0},{dx:-2,dy:0},{dx:0,dy:2},{dx:0,dy:-2}].sort(()=>Math.random()-.5);
+  for (const {dx,dy} of dirs) {
+    const nx = x+dx, ny = y+dy;
+    if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&!mazeGrid[ny][nx]) {
+      mazeGrid[y+dy/2][x+dx/2] = 1;
+      generateMaze(nx, ny);
+    }
+  }
+}
+
+function bfs(from, to) {
+  const queue = [{...from, path:[{...from}]}];
+  const visited = new Set([`${from.x},${from.y}`]);
+  while (queue.length) {
+    const {x,y,path} = queue.shift();
+    if (x===to.x && y===to.y) return path;
+    for (const {dx,dy} of [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}]) {
+      const nx=x+dx, ny=y+dy;
+      const k=`${nx},${ny}`;
+      if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&mazeGrid[ny][nx]&&!visited.has(k)) {
+        visited.add(k);
+        queue.push({x:nx,y:ny,path:[...path,{x:nx,y:ny}]});
+      }
+    }
+  }
+  return [];
+}
+
+function bfsWithAvoid(from, to, avoidEdges = new Set()) {
+  const queue = [{...from, path:[{...from}]}];
+  const visited = new Set([`${from.x},${from.y}`]);
+  while (queue.length) {
+    const {x,y,path} = queue.shift();
+    if (x===to.x && y===to.y) return path;
+    for (const {dx,dy} of [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}]) {
+      const nx=x+dx, ny=y+dy;
+      const k=`${nx},${ny}`;
+      const edge1 = `${x},${y}->${nx},${ny}`;
+      const edge2 = `${nx},${ny}->${x},${y}`;
+      if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&mazeGrid[ny][nx]&&!visited.has(k) && !avoidEdges.has(edge1) && !avoidEdges.has(edge2)) {
+        visited.add(k);
+        queue.push({x:nx,y:ny,path:[...path,{x:nx,y:ny}]});
+      }
+    }
+  }
+  return [];
+}
+
+function buildMazePaths() {
+  const end = {x:COLS-1, y:ROWS-1};
+  const main = bfs(playerPos, end) || [];
+  mazePaths = [main];
+  const avoidEdges = new Set();
+  for (let i=0; i<main.length-1 && mazePaths.length<3; i++) {
+    const start = main[i];
+    const next = main[i+1];
+    const edge = `${start.x},${start.y}->${next.x},${next.y}`;
+    avoidEdges.add(edge);
+    const alt = bfsWithAvoid(playerPos, end, avoidEdges);
+    if (alt.length && !mazePaths.some(p => p.map(v => `${v.x},${v.y}`).join('|') === alt.map(v => `${v.x},${v.y}`).join('|'))) {
+      mazePaths.push(alt);
+    }
+  }
+  if (selectedPathIndex >= mazePaths.length) selectedPathIndex = 0;
+  goalPath = mazePaths[selectedPathIndex] || [];
+}
+
+function cycleMazePath() {
+  if (!mazePaths.length) return;
+  selectedPathIndex = (selectedPathIndex + 1) % mazePaths.length;
+  goalPath = mazePaths[selectedPathIndex];
+  const btn = document.querySelector('#panel-maze button.maze-path-btn');
+  if (btn) btn.textContent = `Path ${selectedPathIndex+1}/${mazePaths.length}`;
+  setMazeStatus();
+  drawMaze();
+}
+
+function setMazeStatus() {
+  const pathCount = mazePaths.length;
+  const selectedTip = pathCount ? `Selected: ${selectedPathIndex+1}/${pathCount}` : 'No path';
+  const dist = goalPath.length > 0 ? goalPath.length - 1 : '∞';
+  const warn = (dist !== '∞' && dist <= 4) ? ' ⚠️ CLOSE!' : '';
+  const mode = mazeAiRunning ? ' (Auto running)' : '';
+  document.getElementById('maze-status').textContent = `🟣 You · 🔴 Hunter · 🟢 Goal  · ${selectedTip} · ${dist} steps${warn}${mode}`;
+}
+
+function toggleMazeAuto() {
+  mazeAiRunning = !mazeAiRunning;
+  const btn = document.getElementById('mazeAutoBtn');
+  if (mazeAiRunning) {
+    if (btn) btn.textContent = '⏸ Stop AI';
+    mazeAiInterval = setInterval(mazeAutoStep, 250);
+  } else {
+    if (btn) btn.textContent = '▶ Auto Run';
+    clearInterval(mazeAiInterval); mazeAiInterval = null;
+  }
+  setMazeStatus();
+}
+
+function mazeAutoStep() {
+  if (mazeLocked || !mazeAiRunning) return;
+  if (!goalPath || goalPath.length < 2) return;
+
+  const currentIndex = goalPath.findIndex(p => p.x===playerPos.x && p.y===playerPos.y);
+  if (currentIndex < 0 || currentIndex === goalPath.length - 1) {
+    buildMazePaths();
+  }
+  const path = mazePaths[selectedPathIndex] || goalPath;
+  const idx = path.findIndex(p => p.x===playerPos.x && p.y===playerPos.y);
+  let next = path[1];
+  if (idx >= 0 && idx < path.length - 1) next = path[idx + 1];
+  if (!next) return;
+  movePlayer(next.x - playerPos.x, next.y - playerPos.y);
+}
+
+function drawMaze() {
+  const canvas = document.getElementById('mazeCanvas');
+  if (!canvas || !mazeGrid) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  
+  let displaySize;
+  if (canvas.parentElement) {
+    const pw = canvas.parentElement.clientWidth;
+    displaySize = Math.min(pw - 4, 500);
+  } else {
+    displaySize = 320;
+  }
+  
+  canvas.style.width = displaySize + 'px';
+  canvas.style.height = displaySize + 'px';
+  canvas.width = displaySize * dpr;
+  canvas.height = displaySize * dpr;
+  ctx.scale(dpr, dpr);
+  
+  const cs = displaySize / COLS;
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, displaySize, displaySize);
+  
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    if (mazeGrid[y][x]) {
+      ctx.fillStyle = '#1a1428';
+      ctx.fillRect(x*cs, y*cs, cs, cs);
+    }
+  }
+  
+  if (showPath && mazePaths.length) {
+    const palette = ['rgba(52,211,153,0.35)', 'rgba(59,130,246,0.3)', 'rgba(236,72,153,0.28)'];
+    for (let pi=0; pi<mazePaths.length; pi++) {
+      const p = mazePaths[pi];
+      ctx.fillStyle = palette[pi % palette.length];
+      for (const {x,y} of p) ctx.fillRect(x*cs+1, y*cs+1, cs-2, cs-2);
+    }
+  }
+
+  if (goalPath.length) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < goalPath.length; i++) {
+      const p = goalPath[i];
+      const cx = p.x*cs + cs/2;
+      const cy = p.y*cs + cs/2;
+      if (i===0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+  }
+
+  const gpad = cs * 0.2;
+  ctx.fillStyle = '#34d399';
+  ctx.beginPath();
+  ctx.roundRect((COLS-1)*cs+gpad, (ROWS-1)*cs+gpad, cs-gpad*2, cs-gpad*2, 3);
+  ctx.fill();
+  
+  ctx.fillStyle = '#c084fc';
+  ctx.beginPath();
+  ctx.arc(playerPos.x*cs+cs/2, playerPos.y*cs+cs/2, cs/2-1, 0, Math.PI*2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#f87171';
+  ctx.beginPath();
+  ctx.arc(hunterPos.x*cs+cs/2, hunterPos.y*cs+cs/2, cs/2-2, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function movePlayer(dx, dy) {
+  if (mazeLocked) return;
+  const nx = playerPos.x + dx, ny = playerPos.y + dy;
+  if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || !mazeGrid[ny][nx]) return;
+  playerPos = {x:nx, y:ny};
+  playerStepCount++;
+  buildMazePaths();
+
+  if (playerPos.x===COLS-1 && playerPos.y===ROWS-1) {
+    mazeLocked = true;
+    document.getElementById('maze-status').textContent = '🎉 You escaped! New maze in 2 seconds...';
+    setTimeout(initMaze, 2000);
+    drawMaze();
+    return;
+  }
+
+  bfsPath = bfs(hunterPos, playerPos);
+
+  // FIXED: Hunter moves slower - every other player move
+  if (bfsPath.length > 1 && playerStepCount % 2 === 0) {
+    hunterPos = bfsPath[1];
+  }
+
+  if (hunterPos.x===playerPos.x && hunterPos.y===playerPos.y) {
+    mazeLocked = true;
+    document.getElementById('maze-status').textContent = '💀 Caught! Click New Maze to try again.';
+    drawMaze();
+    return;
+  }
+
+  setMazeStatus();
+  drawMaze();
+}
+
+function toggleMazePath() {
+  showPath = !showPath;
+  const btn = document.getElementById('mazeShowPathBtn');
+  if (btn) btn.textContent = showPath ? '🔵 Hide Paths' : 'Show Paths';
+  drawMaze();
+}
+
+// Keyboard support for maze
+document.addEventListener('keydown', e => {
+  const panel = document.getElementById('panel-maze');
+  if (!panel.classList.contains('active')) return;
+  const map = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],
+               a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]};
+  const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
+  if (map[key]) { e.preventDefault(); movePlayer(...map[key]); }
+});
+
+// Touch swipe support for maze
+(function() {
+  let sx, sy;
+  const cvs = document.getElementById('mazeCanvas');
+  if (!cvs) return;
+  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener('touchend', e => {
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
+    if(Math.abs(dx)>Math.abs(dy)) movePlayer(dx<0?-1:1, 0);
+    else movePlayer(0, dy<0?-1:1);
+  }, {passive:true});
+})();
+
+initMaze();
+
+// ======================== 2048 ========================
+let board2048, score2048v = 0, best2048v = 0, aiInterval2048 = null, aiRunning = false;
+
+function reset2048() {
+  if (aiRunning) toggleAI2048();
+  board2048 = Array.from({length:4},()=>Array(4).fill(0));
+  score2048v = 0;
+  addTile(); addTile();
+  render2048();
+  document.getElementById('status2048').textContent = 'Use arrow keys or swipe · or let AI play!';
+}
+
+function addTile() {
+  const empty = [];
+  for (let r=0;r<4;r++) for (let c=0;c<4;c++) if (!board2048[r][c]) empty.push([r,c]);
+  if (!empty.length) return;
+  const [r,c] = empty[Math.floor(Math.random()*empty.length)];
+  board2048[r][c] = Math.random()<0.9?2:4;
+}
+
+function render2048() {
+  const b = document.getElementById('board2048');
+  b.innerHTML = '';
+  for (let r=0;r<4;r++) for (let c=0;c<4;c++) {
+    const t = document.createElement('div');
+    const v = board2048[r][c];
+    t.className = 'tile tile-' + Math.min(v, 2048);
+    t.textContent = v || '';
+    b.appendChild(t);
+  }
+  document.getElementById('score2048').textContent = score2048v;
+  if (score2048v > best2048v) { best2048v = score2048v; document.getElementById('best2048').textContent = best2048v; }
+}
+
+function slideRow(row) {
+  let r = row.filter(x=>x), pts = 0;
+  for (let i=0;i<r.length-1;i++) if (r[i]===r[i+1]) { r[i]*=2; pts+=r[i]; r.splice(i+1,1); i++; }
+  while(r.length<4) r.push(0);
+  return {row:r, pts};
+}
+
+function move2048(dir) {
+  let moved=false;
+  const rotated = dir===2||dir===3;
+  const reversed = dir===1||dir===3;
+  let b = board2048.map(r=>[...r]);
+  if (rotated) b = b[0].map((_,c)=>b.map(r=>r[c]));
+  for (let i=0;i<4;i++) {
+    let row = reversed ? [...b[i]].reverse() : [...b[i]];
+    const {row:nr, pts} = slideRow(row);
+    score2048v += pts;
+    const final = reversed ? nr.reverse() : nr;
+    if (final.join()!==b[i].join()) moved=true;
+    b[i] = final;
+  }
+  if (rotated) b = b[0].map((_,c)=>b.map(r=>r[c]));
+  if (moved) { board2048=b; addTile(); render2048(); }
+  return moved;
+}
+
+function heuristic2048(b) {
+  const w=[[7,6,5,4],[6,5,4,3],[5,4,3,2],[4,3,2,1]];
+  let score=0, empty=0, smooth=0, mono=0;
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++) {
+    if(!b[r][c]) { empty++; continue; }
+    score += b[r][c] * w[r][c];
+    if(c<3 && b[r][c+1]) smooth -= Math.abs(Math.log2(b[r][c]) - Math.log2(b[r][c+1]));
+    if(r<3 && b[r+1][c]) smooth -= Math.abs(Math.log2(b[r][c]) - Math.log2(b[r+1][c]));
+    if(c<3) mono += b[r][c] >= b[r][c+1] ? (b[r][c+1] ? Math.log2(b[r][c+1]) : 0) : 0;
+    if(r<3) mono += b[r][c] >= b[r+1][c] ? (b[r+1][c] ? Math.log2(b[r+1][c]) : 0) : 0;
+  }
+  return score + empty*100 + smooth*6 + mono*2;
+}
+
+function copyBoard(b) { return b.map(r=>[...r]); }
+
+function slideBoard(b, dir) {
+  let board = copyBoard(b);
+  let pts = 0, moved = false;
+  const rotated = dir===2||dir===3;
+  const reversed = dir===1||dir===3;
+  if(rotated) board = board[0].map((_,c)=>board.map(r=>r[c]));
+  for(let i=0;i<4;i++){
+    let row = board[i].filter(x=>x);
+    if(reversed) row.reverse();
+    for(let j=0;j<row.length-1;j++){
+      if(row[j]===row[j+1]){ row[j]*=2; pts+=row[j]; row.splice(j+1,1); j++; }
+    }
+    while(row.length<4) row.push(0);
+    if(reversed) row.reverse();
+    if(board[i].join()!==row.join()) moved=true;
+    board[i] = row;
+  }
+  if(rotated) board = board[0].map((_,c)=>board.map(r=>r[c]));
+  return {board, pts, moved};
+}
+
+function expectimax2048(b, d, isMax) {
+  if(d===0) return heuristic2048(b);
+  const moves = [0,1,2,3];
+  let best = isMax ? -Infinity : 0, cnt = 0;
+  for(const m of moves) {
+    const {board:nb, moved} = slideBoard(b, m);
+    if(!moved) continue; cnt++;
+    const v = isMax ? expectimax2048(nb, d-1, false) : expectimax2048(nb, d-1, true);
+    if(isMax) best = Math.max(best, v);
+    else best += v;
+  }
+  return isMax ? best : (cnt>0 ? best/cnt : heuristic2048(b));
+}
+
+function bestMove2048() {
+  let best = -Infinity, move = -1;
+  for (const m of [0,1,2,3]) {
+    const {board:nb, moved} = slideBoard(board2048, m);
+    if(!moved) continue;
+    const v = expectimax2048(nb, 4, false);
+    if (v > best) { best = v; move = m; }
+  }
+  return move >= 0 ? move : Math.floor(Math.random()*4);
+}
+
+function toggleAI2048() {
+  aiRunning = !aiRunning;
+  const btn = document.getElementById('aiToggle2048');
+  if (aiRunning) {
+    btn.textContent = '⏸ Stop AI';
+    aiInterval2048 = setInterval(() => {
+      const move = bestMove2048();
+      move2048(move);
+    }, 400);
+  } else {
+    btn.textContent = '▶ Let AI Play';
+    clearInterval(aiInterval2048);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  const panel = document.getElementById('panel-g2048');
+  if (!panel.classList.contains('active') || aiRunning) return;
+  const map = {ArrowLeft:0, ArrowRight:1, ArrowUp:2, ArrowDown:3};
+  if (map.hasOwnProperty(e.key)) { e.preventDefault(); move2048(map[e.key]); }
+});
+
+(function() {
+  let sx, sy;
+  const board = document.getElementById('board2048');
+  if (board) {
+    board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+    board.addEventListener('touchend', e => {
+      const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+      if (Math.abs(dx)<30&&Math.abs(dy)<30) return;
+      if (Math.abs(dx)>Math.abs(dy)) move2048(dx>0?1:0);
+      else move2048(dy>0?3:2);
+    }, {passive:true});
+  }
+})();
+
+reset2048();
+
+// ======================== RPS ========================
+const rpsEmoji = {R:'✊', P:'✋', S:'✌️'};
+const rpsNames = {R:'Rock', P:'Paper', S:'Scissors'};
+const rpsBeats = {R:'S', P:'R', S:'P'};
+let rpsHistory = [], rpsScores = {you:0, ai:0, tie:0};
+
+function playRPS(choice) {
+  rpsHistory.push(choice);
+  const aiChoice = predictRPS();
+  const you=choice, ai=aiChoice;
+  document.getElementById('rps-you').textContent = rpsEmoji[you];
+  document.getElementById('rps-ai').textContent = rpsEmoji[ai];
+  let result;
+  if(you===ai) { result='🤝 Draw!'; rpsScores.tie++; }
+  else if(rpsBeats[you]===ai) { result='🎉 You win!'; rpsScores.you++; }
+  else { result='🤖 AI wins!'; rpsScores.ai++; }
+  document.getElementById('rps-status').textContent = `${result}`;
+  document.getElementById('rps-yw').textContent = rpsScores.you;
+  document.getElementById('rps-aw').textContent = rpsScores.ai;
+  document.getElementById('rps-tie').textContent = rpsScores.tie;
+}
+
+function predictRPS() {
+  if (rpsHistory.length < 3) return ['R','P','S'][Math.floor(Math.random()*3)];
+  const counts = {R:0,P:0,S:0};
+  rpsHistory.forEach(c => counts[c]++);
+  const last2 = rpsHistory.slice(-2).join('');
+  const pattern3 = {};
+  for(let i=0;i<rpsHistory.length-2;i++) {
+    const k = rpsHistory[i]+rpsHistory[i+1];
+    const next = rpsHistory[i+2];
+    if(!pattern3[k]) pattern3[k]=[];
+    pattern3[k].push(next);
+  }
+  let predicted;
+  if(pattern3[last2]&&pattern3[last2].length) {
+    const freq={R:0,P:0,S:0};
+    pattern3[last2].forEach(c=>freq[c]++);
+    predicted = Object.keys(freq).reduce((a,b)=>freq[a]>=freq[b]?a:b);
+  } else {
+    predicted = Object.keys(counts).reduce((a,b)=>counts[a]>=counts[b]?a:b);
+  }
+  return rpsBeats[predicted];
+}
+
+function resetRPS() {
+  rpsHistory = [];
+  rpsScores = {you:0, ai:0, tie:0};
+  document.getElementById('rps-you').textContent = '❓';
+  document.getElementById('rps-ai').textContent = '🤖';
+  document.getElementById('rps-status').textContent = 'Choose your move!';
+  document.getElementById('rps-yw').textContent = '0';
+  document.getElementById('rps-aw').textContent = '0';
+  document.getElementById('rps-tie').textContent = '0';
+}
+
+// ======================== SNAKE ========================
+const SCOLS=16, SROWS=16;
+let snake, snakeFood, snakeDir2, snakeRunning=false, snakeInt=null, snakeScore=0, playerControlled=false;
+
+function resetSnake() {
+  snake = [{x:8,y:8},{x:7,y:8},{x:6,y:8}];
+  snakeDir2 = {x:1,y:0};
+  placeFood();
+  snakeScore=0;
+  drawSnake();
+  document.getElementById('snake-status').textContent = 'Press Start to watch AI snake hunt food!';
+  if(snakeRunning) { clearInterval(snakeInt); snakeRunning=false; document.getElementById('snakeBtn').textContent='▶ Start AI'; }
+}
+
+function placeFood() {
+  do { snakeFood={x:Math.floor(Math.random()*SCOLS), y:Math.floor(Math.random()*SROWS)}; }
+  while(snake.some(s=>s.x===snakeFood.x&&s.y===snakeFood.y));
+}
+
+function snakeDir(dx,dy) {
+  if (dx !== 0 && snakeDir2.x === -dx) return;
+  if (dy !== 0 && snakeDir2.y === -dy) return;
+  playerControlled=true;
+  snakeDir2={x:dx,y:dy};
+  const btn=document.getElementById('snakeBtn');
+  if(snakeRunning) btn.textContent='⏸ Stop (Manual)';
+}
+
+function floodFill(head, body) {
+  const visited = new Set(body.map(s=>`${s.x},${s.y}`));
+  const queue = [head];
+  visited.add(`${head.x},${head.y}`);
+  let count = 0;
+  while(queue.length) {
+    const {x,y} = queue.shift();
+    count++;
+    for(const {x:dx,y:dy} of [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]) {
+      const nx=x+dx, ny=y+dy, k=`${nx},${ny}`;
+      if(nx>=0&&nx<SCOLS&&ny>=0&&ny<SROWS&&!visited.has(k)) {
+        visited.add(k); queue.push({x:nx,y:ny});
+      }
+    }
+  }
+  return count;
+}
+
+function greedySnakeMove() {
+  const head = snake[0];
+  const dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+  const valid = dirs.filter(d => {
+    const nx=head.x+d.x, ny=head.y+d.y;
+    return nx>=0&&nx<SCOLS&&ny>=0&&ny<SROWS&&!snake.some(s=>s.x===nx&&s.y===ny);
+  });
+  if(!valid.length) return snakeDir2;
+  let best=null, bestScore=-Infinity;
+  for(const d of valid) {
+    const nx=head.x+d.x, ny=head.y+d.y;
+    const dist = Math.abs(nx-snakeFood.x)+Math.abs(ny-snakeFood.y);
+    const futureBody = snake.slice(0,-1);
+    const space = floodFill({x:nx,y:ny}, futureBody);
+    if(space < snake.length * 0.5) continue;
+    const score = space * 3 - dist;
+    if(score > bestScore) { bestScore=score; best=d; }
+  }
+  if(!best) {
+    let maxSpace=-1;
+    for(const d of valid) {
+      const nx=head.x+d.x, ny=head.y+d.y;
+      const space = floodFill({x:nx,y:ny}, snake.slice(0,-1));
+      if(space>maxSpace){ maxSpace=space; best=d; }
+    }
+  }
+  return best || snakeDir2;
+}
+
+function stepSnake() {
+  const move = playerControlled ? snakeDir2 : greedySnakeMove();
+  const head = snake[0];
+  const nx = head.x+move.x, ny = head.y+move.y;
+  if(nx<0||nx>=SCOLS||ny<0||ny>=SROWS||snake.some(s=>s.x===nx&&s.y===ny)) {
+    clearInterval(snakeInt); snakeRunning=false;
+    document.getElementById('snakeBtn').textContent='▶ Start AI';
+    document.getElementById('snake-status').textContent=`💀 Game over! Score: ${snakeScore}`;
+    return;
+  }
+  snake.unshift({x:nx,y:ny});
+  if(nx===snakeFood.x&&ny===snakeFood.y) {
+    snakeScore++; placeFood();
+    const mode = playerControlled ? '🕹️ Manual' : '🤖 AI';
+    document.getElementById('snake-status').textContent=`🍎 Score: ${snakeScore} — ${mode} mode`;
+  }
+  else snake.pop();
+  snakeDir2=move;
+  drawSnake();
+}
+
+function drawSnake() {
+  const canvas=document.getElementById('snakeCanvas');
+  if(!canvas||!snake) return;
+  const dpr = window.devicePixelRatio || 1;
+  const displaySize = canvas.parentElement
+    ? Math.min(canvas.parentElement.clientWidth - 32, 400)
+    : 320;
+  const size = Math.max(displaySize, 160);
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const cs = size / SCOLS;
+  ctx.fillStyle='#0a0a0f'; ctx.fillRect(0,0,size,size);
+  ctx.strokeStyle='#12101e'; ctx.lineWidth=0.5;
+  for(let i=0;i<=SCOLS;i++) { ctx.beginPath();ctx.moveTo(i*cs,0);ctx.lineTo(i*cs,SROWS*cs);ctx.stroke(); }
+  for(let i=0;i<=SROWS;i++) { ctx.beginPath();ctx.moveTo(0,i*cs);ctx.lineTo(SCOLS*cs,i*cs);ctx.stroke(); }
+  ctx.fillStyle='#34d399';
+  ctx.beginPath();ctx.arc(snakeFood.x*cs+cs/2,snakeFood.y*cs+cs/2,cs/2-1,0,Math.PI*2);ctx.fill();
+  snake.forEach((s,i) => {
+    ctx.fillStyle = i===0 ? '#c084fc' : `rgba(124,58,237,${Math.max(0.3,1-i/snake.length*0.7)})`;
+    ctx.beginPath();ctx.roundRect(s.x*cs+1,s.y*cs+1,cs-2,cs-2,3);ctx.fill();
+  });
+}
+
+function toggleSnake() {
+  snakeRunning=!snakeRunning;
+  playerControlled=false;
+  const btn=document.getElementById('snakeBtn');
+  if(snakeRunning) { btn.textContent='⏸ Stop'; snakeInt=setInterval(stepSnake,120); document.getElementById('snake-status').textContent='🤖 AI is playing! Press arrows to take control.'; }
+  else { btn.textContent='▶ Start AI'; clearInterval(snakeInt); }
+}
+
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('panel-snake').classList.contains('active')) return;
+  const map={ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1}};
+  if(map[e.key]) { e.preventDefault(); snakeDir(map[e.key].x, map[e.key].y); }
+});
+
+(function() {
+  let sx, sy;
+  const cvs = document.getElementById('snakeCanvas');
+  if (!cvs) return;
+  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener('touchend', e => {
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<15&&Math.abs(dy)<15) return;
+    if(Math.abs(dx)>Math.abs(dy)) snakeDir(dx<0?-1:1, 0);
+    else snakeDir(0, dy<0?-1:1);
+  }, {passive:true});
+})();
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('panel-maze').classList.contains('active')) drawMaze();
+  if (document.getElementById('panel-snake').classList.contains('active')) drawSnake();
+});
+
+resetSnake();
+</script>
