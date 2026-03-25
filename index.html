@@ -1025,9 +1025,9 @@ reset2048();
 
 // ======================== RPS ========================
 let rpsHistory=[], rpsScores={you:0,ai:0,tie:0};
-const rpsEmoji={R:'✊',P:'✋',S:'✌️'};
-const rpsBeats={R:'S',P:'R',S:'P'};
-const rpsNames={R:'Rock',P:'Paper',S:'Scissors'};
+var rpsEmoji={R:'✊',P:'✋',S:'✌️'};
+var rpsBeats={R:'P',P:'S',S:'R'};
+var rpsNames={R:'Rock',P:'Paper',S:'Scissors'};
 
 function playRPS(choice) {
   rpsHistory.push(choice);
@@ -1037,8 +1037,8 @@ function playRPS(choice) {
   document.getElementById('rps-ai').textContent = rpsEmoji[ai];
   let result;
   if(you===ai) { result='🤝 Draw!'; rpsScores.tie++; }
-  else if(rpsBeats[you]===ai) { result='🎉 You win!'; rpsScores.you++; }
-  else { result='🤖 AI wins!'; rpsScores.ai++; }
+  else if(ai === rpsBeats[you]) { result='🤖 AI wins!'; rpsScores.ai++; }
+  else { result='🎉 You win!'; rpsScores.you++; }
   document.getElementById('rps-status').textContent = `${result} You: ${rpsNames[you]}, AI: ${rpsNames[ai]}`;
   document.getElementById('rps-yw').textContent = rpsScores.you;
   document.getElementById('rps-aw').textContent = rpsScores.ai;
@@ -1063,9 +1063,15 @@ function predictRPS() {
   if(pattern3[last2]&&pattern3[last2].length) {
     const freq={R:0,P:0,S:0};
     pattern3[last2].forEach(c=>freq[c]++);
-    predicted = Object.keys(freq).reduce((a,b)=>freq[a]>=freq[b]?a:b);
+    predicted = 'R';
+    let max = freq['R'];
+    if (freq['P'] > max) { max = freq['P']; predicted = 'P'; }
+    if (freq['S'] > max) { max = freq['S']; predicted = 'S'; }
   } else {
-    predicted = Object.keys(counts).reduce((a,b)=>counts[a]>=counts[b]?a:b);
+    predicted = 'R';
+    let max = counts['R'];
+    if (counts['P'] > max) { max = counts['P']; predicted = 'P'; }
+    if (counts['S'] > max) { max = counts['S']; predicted = 'S'; }
   }
   return rpsBeats[predicted];
 }
@@ -1210,5 +1216,7 @@ document.addEventListener('keydown', e => {
 })();
 
 resetSnake();
+
+// Initialize RPS
 resetRPS();
 </script>
