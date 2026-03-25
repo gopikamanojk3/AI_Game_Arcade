@@ -373,28 +373,36 @@
   </div>
 
   <!-- MAZE -->
-  <div class="game-panel" id="panel-maze">
-    <div class="ai-badge">BFS Pathfinding — Optimal Pursuit</div>
-    <details class="how-to-play" open>
+ <div class="game-panel" id="panel-maze">
+    <div class="ai-badge">Unit 2: BFS Pathfinding</div>
+     <details class="how-to-play" open>
       <summary>📖 How to Play</summary>
       <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">green square</span> in the bottom-right corner.</div>
-      <div class="tip"><b>You are the <span style="color:#c084fc">purple circle</span>.</b> Move with <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys or <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>. On mobile, use the D-pad buttons.</div>
+      <div class="tip"><b>You are the <span style="color:#4fe3ee">teal circle</span>.</b> Move with <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys or <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>. On mobile, use the D-pad buttons.</div>
       <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter</span></b> — it uses BFS to chase you through the maze every time you move!</div>
       <div class="tip">💡 Click <b>Show BFS Path</b> to see exactly where the hunter is heading.</div>
     </details>
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
+        <button class="btn btn-sm" onclick="setDifficulty('easy')">Easy (1 Hunter)</button>
+        <button class="btn btn-sm" onclick="setDifficulty('hard')">Hard (2 Hunters)</button>
+    </div>
+
     <canvas id="mazeCanvas" width="320" height="320"></canvas>
-    <div class="status-bar" id="maze-status">Arrow keys / WASD to move. Hunter uses BFS!</div>
-    <div style="display:flex;gap:8px;margin-bottom:0.75rem">
-      <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
-      <button class="btn btn-sm btn-ghost" onclick="toggleMazePath()">Show BFS Path</button>
+
+    <div class="status-bar" id="maze-status">Use Buttons or WASD to Move</div>
+    
+    <div style="display:flex; gap:8px; justify-content:center; margin-bottom:15px;">
+        <button class="btn btn-sm" onclick="initMaze()">Reset Maze</button>
+        <button class="btn btn-sm btn-ghost" id="minCostBtn" onclick="toggleMinCost()">Show Min-Cost Path</button>
     </div>
-    <div class="snake-controls" style="margin:0 auto 0.5rem">
-      <div></div><button class="d-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
-      <button class="d-btn" onclick="movePlayer(-1,0)">←</button>
-      <button class="d-btn" onclick="movePlayer(0,1)">↓</button>
-      <button class="d-btn" onclick="movePlayer(1,0)">→</button>
+
+    <div class="snake-controls" style="display: grid; grid-template-columns: repeat(3, 50px); gap: 5px; justify-content: center;">
+        <div></div><button class="d-btn" onclick="handleMove(0,-1)">↑</button><div></div>
+        <button class="d-btn" onclick="handleMove(-1,0)">←</button>
+        <button class="d-btn" onclick="handleMove(0,1)">↓</button>
+        <button class="d-btn" onclick="handleMove(1,0)">→</button>
     </div>
-  </div>
+</div>
 
   <!-- 2048 -->
   <div class="game-panel" id="panel-g2048">
@@ -601,127 +609,189 @@ function bestMove() {
 initTTT();
 
 // ======================== MAZE ========================
-const COLS = 16, ROWS = 16, CS = 20;
-let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [];
+// 1. Configuration Constants
+const COLS = 16, ROWS = 16, CS = 20; 
+let mazeGrid = [];
+let playerPos = { x: 1, y: 1 };
+let hunters = [];
+let isGameOver = false;
+let showMinCost = false;
 
+
+// 2. Initialize the Maze (With Multiple Paths)
 function initMaze() {
-  mazeGrid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-  generateMaze(0, 0);
-  playerPos = {x:0, y:0};
-  // Start hunter far away in the bottom-right quadrant
-  const candidates = [];
-  for (let y = Math.floor(ROWS/2); y < ROWS; y++)
-    for (let x = Math.floor(COLS/2); x < COLS; x++)
-      if (mazeGrid[y][x] && !(x===COLS-1&&y===ROWS-1)) candidates.push({x,y});
-  hunterPos = candidates[Math.floor(Math.random()*candidates.length)] || {x:COLS-2, y:ROWS-2};
-  bfsPath = bfs(hunterPos, playerPos);
-  drawMaze();
-  document.getElementById('maze-status').textContent = '🟣 You = purple · 🔴 Hunter = red · 🟢 Goal = green corner';
-}
+    isGameOver = false;
+    updateStatus("Use Buttons or WASD to Move");
+    
+    // Fill grid with walls (0 = wall, 1 = path)
+    mazeGrid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 
-function generateMaze(x, y) {
-  mazeGrid[y][x] = 1;
-  const dirs = [{dx:2,dy:0},{dx:-2,dy:0},{dx:0,dy:2},{dx:0,dy:-2}].sort(()=>Math.random()-.5);
-  for (const {dx,dy} of dirs) {
-    const nx = x+dx, ny = y+dy;
-    if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&!mazeGrid[ny][nx]) {
-      mazeGrid[y+dy/2][x+dx/2] = 1;
-      generateMaze(nx, ny);
+    // Simple Randomized Prim's/DFS hybrid to ensure connectivity
+    function carve(x, y) {
+        mazeGrid[y][x] = 1;
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]].sort(() => Math.random() - 0.5);
+        dirs.forEach(([dx, dy]) => {
+            const nx = x + dx*2, ny = y + dy*2;
+            if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && mazeGrid[ny][nx] === 0) {
+                mazeGrid[y+dy][x+dx] = 1;
+                carve(nx, ny);
+            }
+        });
     }
-  }
-}
+    carve(1, 1);
 
-function bfs(from, to) {
-  const queue = [{...from, path:[{...from}]}];
-  const visited = new Set([`${from.x},${from.y}`]);
-  while (queue.length) {
-    const {x,y,path} = queue.shift();
-    if (x===to.x && y===to.y) return path;
-    for (const {dx,dy} of [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}]) {
-      const nx=x+dx, ny=y+dy;
-      const k=`${nx},${ny}`;
-      if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&mazeGrid[ny][nx]&&!visited.has(k)) {
-        visited.add(k);
-        queue.push({x:nx,y:ny,path:[...path,{x:nx,y:ny}]});
-      }
+    // CRITICAL: Create "Multiple Paths" by randomly removing extra walls
+    for (let i = 0; i < 30; i++) {
+        let rx = Math.floor(Math.random() * (COLS-2)) + 1;
+        let ry = Math.floor(Math.random() * (ROWS-2)) + 1;
+        mazeGrid[ry][rx] = 1; 
     }
-  }
-  return [];
+
+    // Ensure exits are accessible
+    mazeGrid[ROWS-1][COLS-1] = 1; mazeGrid[0][COLS-1] = 1; mazeGrid[ROWS-1][0] = 1;
+
+    playerPos = { x: 1, y: 1 };
+    setDifficulty('easy'); // Sets initial hunters
+    drawMaze();
 }
 
+// 3. BFS Algorithm (For Hunter AI & Pathfinding)
+function bfs(start, goal) {
+    let queue = [[start]];
+    let visited = new Set([`${start.x},${start.y}`]);
+    
+    while (queue.length > 0) {
+        let path = queue.shift();
+        let curr = path[path.length - 1];
+
+        if (curr.x === goal.x && curr.y === goal.y) return path.slice(1);
+
+        const neighbors = [
+            {x: curr.x, y: curr.y-1}, {x: curr.x, y: curr.y+1},
+            {x: curr.x-1, y: curr.y}, {x: curr.x+1, y: curr.y}
+        ];
+
+        for (let n of neighbors) {
+            if (n.x >= 0 && n.x < COLS && n.y >= 0 && n.y < ROWS && 
+                mazeGrid[n.y][n.x] === 1 && !visited.has(`${n.x},${n.y}`)) {
+                visited.add(`${n.x},${n.y}`);
+                queue.push([...path, n]);
+            }
+        }
+    }
+    return [];
+}
+
+// 4. Helper Functions
+function updateStatus(msg) {
+    document.getElementById('maze-status').innerText = msg;
+}
+
+function setDifficulty(level) {
+    isGameOver = false; // Reset game state on difficulty change
+    playerPos = { x: 1, y: 1 };
+    hunters = (level === 'easy') ? 
+        [{x: COLS-2, y: ROWS-2}] : 
+        [{x: COLS-2, y: ROWS-2}, {x: 5, y: 5}];
+    drawMaze();
+}
+
+function toggleMinCost() {
+    showMinCost = !showMinCost;
+    drawMaze();
+}
+
+// 5. Drawing Logic (The "Eyes" of the game)
 function drawMaze() {
-  const canvas = document.getElementById('mazeCanvas');
-  if (!canvas || !mazeGrid) return;
-  const ctx = canvas.getContext('2d');
-  const cw = canvas.clientWidth || 320;
-  canvas.width = COLS * CS;
-  canvas.height = ROWS * CS;
-  ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  for (let y=0;y<ROWS;y++) for (let x=0;x<COLS;x++) {
-    if (mazeGrid[y][x]) {
-      ctx.fillStyle = '#1a1428';
-      ctx.fillRect(x*CS,y*CS,CS,CS);
+    const canvas = document.getElementById('mazeCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            // Draw Walls vs Paths
+            ctx.fillStyle = mazeGrid[y][x] === 0 ? "#1a1a2e" : "#16213e";
+            ctx.fillRect(x * CS, y * CS, CS, CS);
+        }
     }
-  }
-  if (showPath && bfsPath.length) {
-    ctx.fillStyle = 'rgba(124,58,237,0.3)';
-    for (const {x,y} of bfsPath) ctx.fillRect(x*CS+2,y*CS+2,CS-4,CS-4);
-  }
-  // goal
-  ctx.fillStyle = '#34d399';
-  ctx.fillRect((COLS-1)*CS+4,(ROWS-1)*CS+4,CS-8,CS-8);
-  // player
-  ctx.fillStyle = '#c084fc';
-  ctx.beginPath();
-  ctx.arc(playerPos.x*CS+CS/2, playerPos.y*CS+CS/2, CS/2-2, 0, Math.PI*2);
-  ctx.fill();
-  // hunter
-  ctx.fillStyle = '#f87171';
-  ctx.beginPath();
-  ctx.arc(hunterPos.x*CS+CS/2, hunterPos.y*CS+CS/2, CS/2-3, 0, Math.PI*2);
-  ctx.fill();
+
+    // Visualize BFS Path to Exit (if toggled)
+    if (showMinCost && !isGameOver) {
+        const path = bfs(playerPos, { x: COLS - 1, y: ROWS - 1 });
+        ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+        path.forEach(p => ctx.fillRect(p.x * CS, p.y * CS, CS, CS));
+    }
+
+    // Exit Point (Green)
+    ctx.fillStyle = "#4ecca3";
+    ctx.fillRect((COLS - 1) * CS, (ROWS - 1) * CS, CS, CS);
+
+    // Player (Blue Circle)
+    ctx.fillStyle = "#00d2ff";
+    ctx.beginPath();
+    ctx.arc(playerPos.x * CS + CS/2, playerPos.y * CS + CS/2, CS/3, 0, Math.PI*2);
+    ctx.fill();
+
+    // Hunters (Red Squares)
+    ctx.fillStyle = "#ff4b2b";
+    hunters.forEach(h => ctx.fillRect(h.x * CS + 4, h.y * CS + 4, CS - 8, CS - 8));
 }
 
-function movePlayer(dx, dy) {
-  const nx = playerPos.x+dx, ny = playerPos.y+dy;
-  if (nx<0||nx>=COLS||ny<0||ny>=ROWS||!mazeGrid[ny][nx]) return;
-  playerPos = {x:nx, y:ny};
-  if (playerPos.x===COLS-1&&playerPos.y===ROWS-1) {
-    document.getElementById('maze-status').textContent = '🎉 You escaped! New maze incoming...';
-    setTimeout(initMaze, 1200);
-    return;
-  }
-  bfsPath = bfs(hunterPos, playerPos);
-  if (bfsPath.length > 1) hunterPos = bfsPath[1];
-  if (hunterPos.x===playerPos.x&&hunterPos.y===playerPos.y) {
-    document.getElementById('maze-status').textContent = '💀 Caught! Click New Maze to try again.';
-    drawMaze(); return;
-  }
-  const dist = bfsPath.length;
-  const warn = dist <= 3 ? ' ⚠️ Hunter is close!' : '';
-  document.getElementById('maze-status').textContent = `Hunter is ${dist} steps away${warn}`;
-  drawMaze();
+// 6. Movement & AI (The "Brain" of the game)
+function handleMove(dx, dy) {
+    if (isGameOver) return;
+
+    const nx = playerPos.x + dx;
+    const ny = playerPos.y + dy;
+
+    // Wall Collision Check
+    if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && mazeGrid[ny][nx] === 1) {
+        playerPos.x = nx;
+        playerPos.y = ny;
+
+        // Check for Win
+        if (playerPos.x === COLS - 1 && playerPos.y === ROWS - 1) {
+            isGameOver = true;
+            updateStatus("🏆 Escaped the BFS Maze!");
+        } else {
+            moveHunters();
+        }
+    }
+    drawMaze();
 }
 
-function toggleMazePath() {
-  showPath = !showPath;
-  const btn = document.querySelector('#panel-maze .btn-ghost');
-  if (btn) btn.textContent = showPath ? '🔵 Hide BFS Path' : 'Show BFS Path';
-  drawMaze();
+function moveHunters() {
+    hunters.forEach(h => {
+        // AI uses your BFS to find the shortest path to YOU
+        const path = bfs(h, playerPos);
+        if (path.length > 0) {
+            h.x = path[0].x;
+            h.y = path[0].y;
+        }
+
+        // Catch Condition
+        if (h.x === playerPos.x && h.y === playerPos.y) {
+            isGameOver = true;
+            updateStatus("💀 Caught! Try again.");
+        }
+    });
 }
 
-document.addEventListener('keydown', e => {
-  const panel = document.getElementById('panel-maze');
-  if (!panel.classList.contains('active')) return;
-  const map = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],
-               a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]};
-  const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
-  if (map[key]) { e.preventDefault(); movePlayer(...map[key]); }
+// 7. Event Listeners for Keyboard
+window.addEventListener('keydown', (e) => {
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(e.key.toLowerCase())) {
+        e.preventDefault(); // Stop page scrolling
+    }
+    switch(e.key.toLowerCase()) {
+        case 'w': case 'arrowup':    handleMove(0, -1); break;
+        case 's': case 'arrowdown':  handleMove(0, 1);  break;
+        case 'a': case 'arrowleft':  handleMove(-1, 0); break;
+        case 'd': case 'arrowright': handleMove(1, 0);  break;
+    }
 });
 
+// Run initial maze generation
 initMaze();
-
 // ======================== 2048 ========================
 let board2048, score2048v = 0, best2048v = 0, aiInterval2048 = null, aiRunning = false;
 
