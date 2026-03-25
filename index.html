@@ -30,19 +30,28 @@
     --text:      #e8e6f0;
     --muted:     #6b5a8e;
     --muted2:    #4a3a6e;
-    --panel-w:   560px;   /* content width on desktop */
+    --panel-w:   100%;
+    --max-w:     560px;
   }
 
   /* ── Page shell ── */
-  html, body { background: var(--bg); min-height: 100vh; }
+  html, body { 
+    background: var(--bg); 
+    min-height: 100vh; 
+    width: 100%;
+    overflow-x: hidden;
+  }
 
   .arcade {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    max-width: var(--panel-w);
+    width: 100%;
+    max-width: var(--max-w);
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ── Header ── */
@@ -51,10 +60,11 @@
     border-bottom: 1px solid var(--border);
     padding: 1.25rem 1.5rem 1rem;
     text-align: center;
+    flex-shrink: 0;
   }
   .arcade-title {
     font-family: 'Space Mono', monospace;
-    font-size: 20px;
+    font-size: clamp(16px, 5vw, 24px);
     font-weight: 700;
     color: var(--purple);
     letter-spacing: 4px;
@@ -77,12 +87,13 @@
     border-bottom: 1px solid var(--border2);
     overflow-x: auto;
     scrollbar-width: none;
+    flex-shrink: 0;
   }
   .nav-tabs::-webkit-scrollbar { display: none; }
 
   .nav-tab {
-    flex: 1;
-    min-width: 88px;
+    flex-shrink: 0;
+    min-width: 80px;
     padding: 8px 6px 7px;
     border: 1px solid var(--border);
     border-bottom: none;
@@ -103,8 +114,13 @@
   .nav-tab.active .tab-unit { color: var(--purple3); }
 
   /* ── Game panel ── */
-  .game-panel { display: none; padding: 1.25rem 1.25rem 2rem; }
-  .game-panel.active { display: block; }
+  .game-panel { 
+    display: none; 
+    padding: 1.25rem 1.25rem 2rem; 
+    flex: 1;
+    overflow-y: auto;
+  }
+  .game-panel.active { display: flex; flex-direction: column; }
 
   /* ── AI badge ── */
   .ai-badge {
@@ -119,6 +135,7 @@
     color: var(--purple2);
     margin-bottom: 1rem;
     font-family: 'Space Mono', monospace;
+    width: fit-content;
   }
   .ai-badge::before { content: "◆"; font-size: 8px; }
 
@@ -249,27 +266,77 @@
     border-radius: 10px;
     width: 100%;
     max-width: 100%;
+    height: auto;
     margin: 0 auto 1rem;
     image-rendering: auto;
+    touch-action: none;
   }
 
-  /* D-pad */
-  .snake-controls {
-    display: grid;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(2, 48px);
-    gap: 5px;
-    margin: 0 auto 0.75rem;
-    width: 154px;
+  /* Maze container with controls */
+  .maze-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
   }
-  .d-btn {
-    width: 48px;
-    height: 48px;
+
+  .maze-canvas-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #mazeCanvas {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 10px;
+    margin: 0;
+  }
+
+  .maze-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .maze-btn {
+    width: 100%;
+    aspect-ratio: 1;
     background: var(--bg3);
     border: 1px solid var(--border);
     border-radius: 10px;
     color: var(--purple2);
-    font-size: 18px;
+    font-size: clamp(16px, 5vw, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .maze-btn:active { background: var(--border); transform: scale(0.95); }
+
+  /* D-pad */
+  .snake-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin: 0 auto 0.75rem;
+    max-width: 200px;
+    width: 100%;
+  }
+  .d-btn {
+    aspect-ratio: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--purple2);
+    font-size: clamp(18px, 5vw, 24px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -349,36 +416,53 @@
   .freq-fill { height: 100%; background: var(--purple3); border-radius: 3px; transition: width 0.3s; }
 
   /* ── Responsive ── */
-  /* Laptop / wide: give content a bit more breathing room */
+  @media (min-width: 480px) {
+    .arcade-title { font-size: 22px; }
+    .arcade-header { padding: 1.4rem 1.8rem 1.1rem; }
+    .game-panel { padding: 1.4rem 1.6rem 2.2rem; }
+    .nav-tab { min-width: 90px; font-size: 12px; padding: 9px 7px 8px; }
+    .nav-tab .tab-icon { font-size: 17px; }
+    .ttt-board { max-width: 320px; gap: 10px; }
+    .ttt-cell { font-size: 40px; border-radius: 14px; }
+    .game2048-board { max-width: 360px; gap: 8px; padding: 12px; }
+    .score-val { font-size: 22px; }
+    .status-bar { font-size: 12px; padding: 10px 16px; }
+    .btn { padding: 10px 20px; font-size: 13px; }
+    .btn-sm { padding: 8px 16px; font-size: 12px; }
+    .maze-controls { max-width: 220px; }
+    .rps-btn { max-height: 130px; }
+  }
+
   @media (min-width: 600px) {
     .arcade-title { font-size: 24px; }
     .arcade-header { padding: 1.5rem 2rem 1.2rem; }
     .game-panel { padding: 1.5rem 1.75rem 2.5rem; }
-    .nav-tab { min-width: 96px; font-size: 12px; padding: 10px 8px 8px; }
+    .nav-tab { min-width: 100px; font-size: 12px; padding: 10px 8px 8px; }
     .nav-tab .tab-icon { font-size: 18px; }
-    .ttt-board { max-width: 320px; gap: 10px; }
-    .ttt-cell { font-size: 42px; border-radius: 14px; }
-    .game2048-board { max-width: 360px; gap: 8px; padding: 12px; }
-    .score-val { font-size: 22px; }
-    .status-bar { font-size: 12px; padding: 10px 16px; }
-    .btn { padding: 10px 22px; font-size: 14px; min-height: 40px; }
-    .btn-sm { padding: 8px 16px; font-size: 13px; min-height: 36px; }
-    .d-btn { width: 52px; height: 52px; font-size: 20px; }
-    .snake-controls { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); gap: 6px; width: 166px; }
-    .rps-btn { max-height: 140px; }
+    .ttt-board { max-width: 340px; gap: 11px; }
+    .ttt-cell { font-size: 44px; border-radius: 15px; }
+    .game2048-board { max-width: 380px; gap: 9px; padding: 13px; }
+    .score-val { font-size: 24px; }
+    .status-bar { font-size: 12px; padding: 11px 16px; }
+    .btn { padding: 11px 22px; font-size: 14px; }
+    .btn-sm { padding: 8px 16px; font-size: 13px; }
+    .maze-controls { max-width: 240px; }
+    .d-btn { grid-template-columns: repeat(3, 60px); }
+    .rps-btn { max-height: 150px; }
   }
 
-  /* Phone: tighten up */
-  @media (max-width: 400px) {
-    .arcade-title { font-size: 16px; letter-spacing: 2px; }
-    .arcade-header { padding: 0.9rem 1rem 0.7rem; }
-    .game-panel { padding: 0.9rem 0.9rem 1.5rem; }
-    .nav-tabs { gap: 3px; padding: 0.6rem 0.4rem 0; }
-    .nav-tab { min-width: 56px; font-size: 9px; padding: 7px 3px 6px; }
-    .score-display { gap: 6px; }
-    .diff-toggle { gap: 6px; }
-    .rps-choices { gap: 8px; }
-    .btn-sm { padding: 6px 10px; font-size: 11px; }
+  /* Phone: extra tight */
+  @media (max-width: 360px) {
+    .arcade-title { font-size: 14px; letter-spacing: 2px; }
+    .arcade-header { padding: 0.8rem 0.9rem 0.6rem; }
+    .game-panel { padding: 0.8rem 0.8rem 1.2rem; }
+    .nav-tabs { gap: 2px; padding: 0.5rem 0.3rem 0; }
+    .nav-tab { min-width: 50px; font-size: 8px; padding: 6px 2px 5px; }
+    .score-display { gap: 5px; }
+    .diff-toggle { gap: 5px; }
+    .rps-choices { gap: 6px; }
+    .btn-sm { padding: 5px 8px; font-size: 10px; }
+    .maze-controls { max-width: 160px; gap: 6px; }
   }
 </style>
 
@@ -437,69 +521,65 @@
 
   <!-- MAZE -->
   <div class="game-panel" id="panel-maze">
-    <div class="ai-badge">BFS Pathfinding — Optimal Pursuit</div>
-    <details class="how-to-play">
+    <div class="ai-badge">Breadth-First Search Pathfinding</div>
+    <details class="how-to-play" open>
       <summary>📖 How to Play</summary>
-      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">🟢 green square</span> in the bottom-right corner.</div>
-      <div class="tip"><b>You are the <span style="color:#c084fc">purple circle</span>.</b> Use <span class="key">↑↓←→</span> arrow keys, <span class="key">WASD</span>, or the D-pad below.</div>
-      <div class="tip"><b>Avoid the <span style="color:#f87171">red hunter</span></b> — it uses BFS to chase you optimally!</div>
-      <div class="tip"><b>Easy:</b> Wider corridors, slower hunter. &nbsp;<b>Hard:</b> Tight maze, hunter matches your pace.</div>
+      <div class="tip"><b>Goal:</b> Reach the <span style="color:#34d399">green square</span> in the bottom-right corner!</div>
+      <div class="tip"><b>Move:</b> Use <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys, WASD, or tap the arrow buttons below.</div>
+      <div class="tip"><b>Avoid the red hunter!</b> The AI uses BFS to chase you. Keep your distance!</div>
+      <div class="tip">💡 <b>Tip:</b> The hunter moves slower than you — use this to your advantage!</div>
     </details>
-    <div class="diff-toggle" style="margin-bottom:0.75rem">
-      <button class="btn btn-sm" id="maze-btn-easy" onclick="setMazeDiff('easy')" style="background:#6d28d9;border-color:#c084fc">Easy</button>
-      <button class="btn btn-sm" id="maze-btn-hard" onclick="setMazeDiff('hard')">Hard</button>
-      <button class="btn btn-sm btn-ghost" onclick="initMaze()" style="margin-left:auto">New Maze</button>
-      <button class="btn btn-sm btn-ghost" id="mazePathBtn" onclick="toggleMazePath()">Show Path</button>
-    </div>
-    <canvas id="mazeCanvas"></canvas>
-    <div class="status-bar" id="maze-status">Choose difficulty and start moving!</div>
-    <div class="snake-controls" style="margin:0.75rem auto 0">
-      <div></div><button class="d-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
-      <button class="d-btn" onclick="movePlayer(-1,0)">←</button>
-      <button class="d-btn" onclick="movePlayer(0,1)">↓</button>
-      <button class="d-btn" onclick="movePlayer(1,0)">→</button>
+    <div class="maze-container">
+      <div class="maze-canvas-wrapper">
+        <canvas id="mazeCanvas"></canvas>
+      </div>
+      <div class="status-bar" id="maze-status">🟣 You (purple) · 🔴 Hunter (red) · 🟢 Goal (green)</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
+        <button class="btn btn-sm btn-ghost" onclick="toggleMazePath()">Show BFS Path</button>
+      </div>
+      <div class="maze-controls">
+        <div></div><button class="maze-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
+        <button class="maze-btn" onclick="movePlayer(-1,0)">←</button>
+        <button class="maze-btn" onclick="movePlayer(1,0)">→</button>
+        <div></div><button class="maze-btn" onclick="movePlayer(0,1)">↓</button><div></div>
+      </div>
     </div>
   </div>
 
   <!-- 2048 -->
   <div class="game-panel" id="panel-g2048">
-    <div class="ai-badge">Expectimax + Heuristic Scoring</div>
+    <div class="ai-badge">Expectimax Game Tree Search</div>
     <details class="how-to-play" open>
       <summary>📖 How to Play</summary>
-      <div class="tip"><b>Goal:</b> Slide tiles to merge matching numbers and reach <b style="color:#c084fc">2048</b>!</div>
-      <div class="tip">Use <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> arrow keys to slide all tiles in that direction. Matching tiles merge and double.</div>
-      <div class="tip">Click <b>▶ AI Play</b> to watch the AI solve it using Expectimax search — it plays much better than humans!</div>
-      <div class="tip">💡 Keep your highest tile in a corner for the best strategy.</div>
+      <div class="tip"><b>Goal:</b> Combine tiles to reach <b>2048</b>!</div>
+      <div class="tip"><b>Move:</b> Use arrow keys or swipe to slide all tiles in a direction.</div>
+      <div class="tip"><b>Combine:</b> Two tiles with the same number merge into one with double the value.</div>
+      <div class="tip">💡 Let the AI play or take control yourself — click buttons to switch!</div>
     </details>
     <div class="score-display">
       <div class="score-box"><div class="score-label">Score</div><div class="score-val" id="score2048">0</div></div>
       <div class="score-box"><div class="score-label">Best</div><div class="score-val" id="best2048">0</div></div>
     </div>
-    <div class="game2048-board" id="board2048"></div>
-    <div class="status-bar" id="status2048">Use arrow keys or swipe to play · or let AI play!</div>
-    <div class="swipe-hint">📱 Swipe on the board to move tiles</div>
-    <div style="display:flex;gap:8px;margin-top:0.75rem">
-      <button class="btn btn-sm" onclick="reset2048()">New Game</button>
-      <button class="btn btn-sm btn-ghost" id="aiBtn" onclick="toggleAI2048()">▶ AI Play</button>
+    <div class="diff-toggle">
+      <button class="btn btn-sm" id="aiToggle2048" onclick="toggleAI2048()">▶ Let AI Play</button>
+      <button class="btn btn-sm btn-ghost" onclick="reset2048()" style="margin-left:auto">Reset</button>
     </div>
+    <div class="game2048-board" id="board2048"></div>
+    <div class="status-bar" id="status2048">Use arrow keys or swipe · or let AI play!</div>
+    <div class="swipe-hint">← Swipe on mobile →</div>
   </div>
 
   <!-- RPS -->
   <div class="game-panel" id="panel-rps">
-    <div class="ai-badge">Pattern Recognition + Frequency Analysis</div>
+    <div class="ai-badge">Pattern Recognition AI</div>
     <details class="how-to-play" open>
       <summary>📖 How to Play</summary>
-      <div class="tip"><b>Goal:</b> Beat the AI at Rock Paper Scissors — but the AI is learning your habits!</div>
-      <div class="tip">Tap <b>✊ Rock</b>, <b>✋ Paper</b>, or <b>✌️ Scissors</b> to play your move.</div>
-      <div class="tip"><b>Rules:</b> Rock beats Scissors · Scissors beats Paper · Paper beats Rock.</div>
-      <div class="tip">💡 The AI tracks your move history and predicts your next pick. Try to be unpredictable!</div>
+      <div class="tip"><b>Goal:</b> Beat the AI at Rock, Paper, Scissors!</div>
+      <div class="tip"><b>Click a button:</b> ✊ Rock, ✋ Paper, or ✌️ Scissors.</div>
+      <div class="tip"><b>The AI learns:</b> It analyzes your patterns to predict your next move.</div>
+      <div class="tip">💡 Can you beat a mind-reading AI? Try to keep it guessing!</div>
     </details>
-    <div class="rps-freq" id="rps-freq">
-      <div style="font-size:11px;color:#6b5a8e;margin-bottom:8px;font-family:'Space Mono',monospace">AI READING YOUR PATTERNS</div>
-      <div class="freq-row"><span style="width:14px">✊</span><div class="freq-bar"><div class="freq-fill" id="freq-r" style="width:33%"></div></div><span id="pct-r" style="width:28px;text-align:right;color:#6b5a8e">0</span></div>
-      <div class="freq-row"><span style="width:14px">✋</span><div class="freq-bar"><div class="freq-fill" id="freq-p" style="width:33%"></div></div><span id="pct-p" style="width:28px;text-align:right;color:#6b5a8e">0</span></div>
-      <div class="freq-row"><span style="width:14px">✌️</span><div class="freq-bar"><div class="freq-fill" id="freq-s" style="width:33%"></div></div><span id="pct-s" style="width:28px;text-align:right;color:#6b5a8e">0</span></div>
-    </div>
     <div class="rps-choices">
       <button class="rps-btn" onclick="playRPS('R')" title="Rock">✊</button>
       <button class="rps-btn" onclick="playRPS('P')" title="Paper">✋</button>
@@ -538,8 +618,8 @@
     <div class="snake-controls">
       <div></div><button class="d-btn" onclick="snakeDir(0,-1)">↑</button><div></div>
       <button class="d-btn" onclick="snakeDir(-1,0)">←</button>
-      <button class="d-btn" onclick="snakeDir(0,1)">↓</button>
       <button class="d-btn" onclick="snakeDir(1,0)">→</button>
+      <div></div><button class="d-btn" onclick="snakeDir(0,1)">↓</button><div></div>
     </div>
     <div style="font-size:11px;color:#4a3a6e;text-align:center">You can also control manually with arrow keys</div>
   </div>
@@ -552,8 +632,9 @@ function showGame(id, tab) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
   if (tab) tab.classList.add('active');
-  if (id === 'maze') drawMaze();
-  if (id === 'snake') drawSnake();
+  if (id === 'maze') { setTimeout(() => drawMaze(), 50); }
+  if (id === 'snake') { setTimeout(() => drawSnake(), 50); }
+  if (id === 'g2048') { setTimeout(() => render2048(), 50); }
 }
 
 // ======================== TIC-TAC-TOE ========================
@@ -667,28 +748,51 @@ function bestMove() {
 initTTT();
 
 // ======================== MAZE ========================
-const COLS = 16, ROWS = 16, CS = 20;
-let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [];
+const COLS = 16, ROWS = 16;
+let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [], goalPath = [], mazeLocked = false, playerStepCount = 0;
+
+function addMazeLoops(extra=24) {
+  let attempts = 0;
+  while (extra > 0 && attempts < 400) {
+    attempts++;
+    const x = Math.floor(Math.random() * (COLS - 2)) + 1;
+    const y = Math.floor(Math.random() * (ROWS - 2)) + 1;
+    if (mazeGrid[y][x]) continue;
+    const openCount = [
+      mazeGrid[y-1][x],
+      mazeGrid[y+1][x],
+      mazeGrid[y][x-1],
+      mazeGrid[y][x+1]
+    ].filter(Boolean).length;
+    if (openCount >= 2) {
+      mazeGrid[y][x] = 1;
+      extra--;
+    }
+  }
+}
 
 function initMaze() {
+  mazeLocked = false;
+  playerStepCount = 0;
   mazeGrid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
   generateMaze(0, 0);
-  // Recursive backtracker only carves even coords, so (COLS-1, ROWS-1) = (15,15)
-  // is always a wall. Force it open and connect it to the maze.
+  addMazeLoops(28);
   mazeGrid[ROWS-1][COLS-1] = 1;
   if (!mazeGrid[ROWS-1][COLS-2] && !mazeGrid[ROWS-2][COLS-1]) {
-    mazeGrid[ROWS-1][COLS-2] = 1; // punch a passage from the left
+    mazeGrid[ROWS-1][COLS-2] = 1;
   }
   playerPos = {x:0, y:0};
-  // Start hunter far away in the bottom-right quadrant
+  
+  // FIXED: Spawn hunter at a significant distance from player
   const candidates = [];
   for (let y = Math.floor(ROWS/2); y < ROWS; y++)
     for (let x = Math.floor(COLS/2); x < COLS; x++)
       if (mazeGrid[y][x] && !(x===COLS-1&&y===ROWS-1)) candidates.push({x,y});
   hunterPos = candidates[Math.floor(Math.random()*candidates.length)] || {x:COLS-2, y:ROWS-2};
   bfsPath = bfs(hunterPos, playerPos);
+  goalPath = bfs(playerPos, {x:COLS-1, y:ROWS-1}) || [];
   drawMaze();
-  document.getElementById('maze-status').textContent = '🟣 You = purple · 🔴 Hunter = red · 🟢 Goal = green corner';
+  document.getElementById('maze-status').textContent = '🟣 You (purple) · 🔴 Hunter (red) · 🟢 Goal (green corner)';
 }
 
 function generateMaze(x, y) {
@@ -725,42 +829,49 @@ function drawMaze() {
   const canvas = document.getElementById('mazeCanvas');
   if (!canvas || !mazeGrid) return;
   const ctx = canvas.getContext('2d');
-  // Use actual display size for crisp rendering on all screens
   const dpr = window.devicePixelRatio || 1;
-  const displaySize = canvas.parentElement
-    ? Math.min(canvas.parentElement.clientWidth - 32, 360)
-    : 320;
-  const size = Math.max(displaySize, 160);
-  canvas.style.width = size + 'px';
-  canvas.style.height = size + 'px';
-  canvas.width = size * dpr;
-  canvas.height = size * dpr;
+  
+  let displaySize;
+  if (canvas.parentElement) {
+    const pw = canvas.parentElement.clientWidth;
+    displaySize = Math.min(pw - 4, 500);
+  } else {
+    displaySize = 320;
+  }
+  
+  canvas.style.width = displaySize + 'px';
+  canvas.style.height = displaySize + 'px';
+  canvas.width = displaySize * dpr;
+  canvas.height = displaySize * dpr;
   ctx.scale(dpr, dpr);
-  const cs = size / COLS; // dynamic cell size
+  
+  const cs = displaySize / COLS;
   ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, displaySize, displaySize);
+  
   for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
     if (mazeGrid[y][x]) {
       ctx.fillStyle = '#1a1428';
       ctx.fillRect(x*cs, y*cs, cs, cs);
     }
   }
-  if (showPath && bfsPath.length) {
-    ctx.fillStyle = 'rgba(124,58,237,0.35)';
-    for (const {x,y} of bfsPath) ctx.fillRect(x*cs+1, y*cs+1, cs-2, cs-2);
+  
+  if (showPath && goalPath.length) {
+    ctx.fillStyle = 'rgba(52,211,153,0.35)';
+    for (const {x,y} of goalPath) ctx.fillRect(x*cs+1, y*cs+1, cs-2, cs-2);
   }
-  // goal
+  
   const gpad = cs * 0.2;
   ctx.fillStyle = '#34d399';
   ctx.beginPath();
   ctx.roundRect((COLS-1)*cs+gpad, (ROWS-1)*cs+gpad, cs-gpad*2, cs-gpad*2, 3);
   ctx.fill();
-  // player
+  
   ctx.fillStyle = '#c084fc';
   ctx.beginPath();
   ctx.arc(playerPos.x*cs+cs/2, playerPos.y*cs+cs/2, cs/2-1, 0, Math.PI*2);
   ctx.fill();
-  // hunter
+  
   ctx.fillStyle = '#f87171';
   ctx.beginPath();
   ctx.arc(hunterPos.x*cs+cs/2, hunterPos.y*cs+cs/2, cs/2-2, 0, Math.PI*2);
@@ -768,33 +879,49 @@ function drawMaze() {
 }
 
 function movePlayer(dx, dy) {
-  const nx = playerPos.x+dx, ny = playerPos.y+dy;
-  if (nx<0||nx>=COLS||ny<0||ny>=ROWS||!mazeGrid[ny][nx]) return;
+  if (mazeLocked) return;
+  const nx = playerPos.x + dx, ny = playerPos.y + dy;
+  if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || !mazeGrid[ny][nx]) return;
   playerPos = {x:nx, y:ny};
-  if (playerPos.x===COLS-1&&playerPos.y===ROWS-1) {
-    document.getElementById('maze-status').textContent = '🎉 You escaped! New maze incoming...';
-    setTimeout(initMaze, 1200);
+  playerStepCount++;
+  goalPath = bfs(playerPos, {x:COLS-1, y:ROWS-1}) || [];
+
+  if (playerPos.x===COLS-1 && playerPos.y===ROWS-1) {
+    mazeLocked = true;
+    document.getElementById('maze-status').textContent = '🎉 You escaped! New maze in 2 seconds...';
+    setTimeout(initMaze, 2000);
+    drawMaze();
     return;
   }
+
   bfsPath = bfs(hunterPos, playerPos);
-  if (bfsPath.length > 1) hunterPos = bfsPath[1];
-  if (hunterPos.x===playerPos.x&&hunterPos.y===playerPos.y) {
-    document.getElementById('maze-status').textContent = '💀 Caught! Click New Maze to try again.';
-    drawMaze(); return;
+
+  // FIXED: Hunter moves slower - every other player move
+  if (bfsPath.length > 1 && playerStepCount % 2 === 0) {
+    hunterPos = bfsPath[1];
   }
-  const dist = bfsPath.length;
-  const warn = dist <= 3 ? ' ⚠️ Hunter is close!' : '';
-  document.getElementById('maze-status').textContent = `Hunter is ${dist} steps away${warn}`;
+
+  if (hunterPos.x===playerPos.x && hunterPos.y===playerPos.y) {
+    mazeLocked = true;
+    document.getElementById('maze-status').textContent = '💀 Caught! Click New Maze to try again.';
+    drawMaze();
+    return;
+  }
+
+  const dist = goalPath.length;
+  const warn = dist <= 3 ? ' ⚠️ CLOSE!' : '';
+  document.getElementById('maze-status').textContent = `Distance to goal: ${dist} steps${warn}`;
   drawMaze();
 }
 
 function toggleMazePath() {
   showPath = !showPath;
-  const btn = document.querySelector('#panel-maze .btn-ghost');
-  if (btn) btn.textContent = showPath ? '🔵 Hide BFS Path' : 'Show BFS Path';
+  const btn = document.querySelector('#panel-maze button:nth-of-type(2)');
+  if (btn) btn.textContent = showPath ? '🔵 Hide Goal Path' : 'Show Goal Path';
   drawMaze();
 }
 
+// Keyboard support for maze
 document.addEventListener('keydown', e => {
   const panel = document.getElementById('panel-maze');
   if (!panel.classList.contains('active')) return;
@@ -803,6 +930,20 @@ document.addEventListener('keydown', e => {
   const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
   if (map[key]) { e.preventDefault(); movePlayer(...map[key]); }
 });
+
+// Touch swipe support for maze
+(function() {
+  let sx, sy;
+  const cvs = document.getElementById('mazeCanvas');
+  if (!cvs) return;
+  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener('touchend', e => {
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
+    if(Math.abs(dx)>Math.abs(dy)) movePlayer(dx<0?-1:1, 0);
+    else movePlayer(0, dy<0?-1:1);
+  }, {passive:true});
+})();
 
 initMaze();
 
@@ -867,7 +1008,6 @@ function move2048(dir) {
 }
 
 function heuristic2048(b) {
-  // Snake-pattern weight matrix: highest tile to top-left corner
   const w=[[7,6,5,4],[6,5,4,3],[5,4,3,2],[4,3,2,1]];
   let score=0, empty=0, smooth=0, mono=0;
   for(let r=0;r<4;r++) for(let c=0;c<4;c++) {
@@ -883,7 +1023,6 @@ function heuristic2048(b) {
 
 function copyBoard(b) { return b.map(r=>[...r]); }
 
-// Pure slide — never touches globals, returns {board, pts, moved}
 function slideBoard(b, dir) {
   let board = copyBoard(b);
   let pts = 0, moved = false;
@@ -898,109 +1037,81 @@ function slideBoard(b, dir) {
     }
     while(row.length<4) row.push(0);
     if(reversed) row.reverse();
-    if(row.join()!==board[i].join()) moved=true;
-    board[i]=row;
+    if(board[i].join()!==row.join()) moved=true;
+    board[i] = row;
   }
   if(rotated) board = board[0].map((_,c)=>board.map(r=>r[c]));
   return {board, pts, moved};
 }
 
-function expectimax(b, depth, isMax) {
-  if(depth===0) return heuristic2048(b);
-  if(isMax){
-    let best=-Infinity;
-    for(let dir=0;dir<4;dir++){
-      const {board:nb, moved} = slideBoard(b, dir);
-      if(moved) best=Math.max(best, expectimax(nb, depth-1, false));
-    }
-    return best===-Infinity ? heuristic2048(b) : best;
-  } else {
-    const empty=[];
-    for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(!b[r][c]) empty.push([r,c]);
-    if(!empty.length) return heuristic2048(b);
-    const sample = empty.length>4 ? empty.sort(()=>Math.random()-.5).slice(0,4) : empty;
-    let sum=0;
-    for(const [r,c] of sample){
-      for(const [v,p] of [[2,0.9],[4,0.1]]){
-        const nb=copyBoard(b); nb[r][c]=v;
-        sum += p * expectimax(nb, depth-1, true);
-      }
-    }
-    return sum / sample.length;
+function expectimax2048(b, d, isMax) {
+  if(d===0) return heuristic2048(b);
+  const moves = [0,1,2,3];
+  let best = isMax ? -Infinity : 0, cnt = 0;
+  for(const m of moves) {
+    const {board:nb, moved} = slideBoard(b, m);
+    if(!moved) continue; cnt++;
+    const v = isMax ? expectimax2048(nb, d-1, false) : expectimax2048(nb, d-1, true);
+    if(isMax) best = Math.max(best, v);
+    else best += v;
   }
+  return isMax ? best : (cnt>0 ? best/cnt : heuristic2048(b));
 }
 
-function aiMove2048() {
-  let best=-Infinity, bestDir=0;
-  for(let dir=0;dir<4;dir++){
-    const {board:nb, moved} = slideBoard(board2048, dir);
-    if(moved){
-      const v = expectimax(nb, 3, false);
-      if(v>best){ best=v; bestDir=dir; }
-    }
+function bestMove2048() {
+  let best = -Infinity, move = -1;
+  for (const m of [0,1,2,3]) {
+    const {board:nb, moved} = slideBoard(board2048, m);
+    if(!moved) continue;
+    const v = expectimax2048(nb, 4, false);
+    if (v > best) { best = v; move = m; }
   }
-  move2048(bestDir);
-  document.getElementById('status2048').textContent = `🤖 AI playing… score: ${score2048v}`;
-  // Check game over
-  let canMove=false;
-  for(let dir=0;dir<4;dir++) if(slideBoard(board2048,dir).moved){ canMove=true; break; }
-  if(!canMove){ toggleAI2048(); document.getElementById('status2048').textContent='Game over! Score: '+score2048v; }
+  return move >= 0 ? move : Math.floor(Math.random()*4);
 }
 
 function toggleAI2048() {
   aiRunning = !aiRunning;
-  const btn = document.getElementById('aiBtn');
+  const btn = document.getElementById('aiToggle2048');
   if (aiRunning) {
-    btn.textContent = '⏸ Stop AI'; btn.style.background='#6d28d9';
-    aiInterval2048 = setInterval(aiMove2048, 150);
+    btn.textContent = '⏸ Stop AI';
+    aiInterval2048 = setInterval(() => {
+      const move = bestMove2048();
+      move2048(move);
+    }, 400);
   } else {
-    btn.textContent = '▶ AI Play'; btn.style.background='transparent';
+    btn.textContent = '▶ Let AI Play';
     clearInterval(aiInterval2048);
   }
 }
 
 document.addEventListener('keydown', e => {
-  if (!document.getElementById('panel-g2048').classList.contains('active') || aiRunning) return;
-  const map={ArrowLeft:0,ArrowRight:1,ArrowUp:2,ArrowDown:3};
-  if(map[e.key]!==undefined) { e.preventDefault(); move2048(map[e.key]); }
+  const panel = document.getElementById('panel-g2048');
+  if (!panel.classList.contains('active') || aiRunning) return;
+  const map = {ArrowLeft:0, ArrowRight:1, ArrowUp:2, ArrowDown:3};
+  if (map.hasOwnProperty(e.key)) { e.preventDefault(); move2048(map[e.key]); }
 });
 
-// Touch swipe support for 2048
 (function() {
   let sx, sy;
   const board = document.getElementById('board2048');
-  if (!board) return;
-  board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
-  board.addEventListener('touchend', e => {
-    if (aiRunning) return;
-    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
-    if(Math.abs(dx)>Math.abs(dy)) move2048(dx<0?0:1);
-    else move2048(dy<0?2:3);
-  }, {passive:true});
-})();
-
-// Touch swipe support for Maze
-(function() {
-  let sx, sy;
-  const cvs = document.getElementById('mazeCanvas');
-  if (!cvs) return;
-  cvs.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
-  cvs.addEventListener('touchend', e => {
-    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<15&&Math.abs(dy)<15) return;
-    if(Math.abs(dx)>Math.abs(dy)) movePlayer(dx<0?-1:1, 0);
-    else movePlayer(0, dy<0?-1:1);
-  }, {passive:true});
+  if (board) {
+    board.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+    board.addEventListener('touchend', e => {
+      const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+      if (Math.abs(dx)<30&&Math.abs(dy)<30) return;
+      if (Math.abs(dx)>Math.abs(dy)) move2048(dx>0?1:0);
+      else move2048(dy>0?3:2);
+    }, {passive:true});
+  }
 })();
 
 reset2048();
 
 // ======================== RPS ========================
-let rpsHistory=[], rpsScores={you:0,ai:0,tie:0};
-const rpsEmoji={R:'✊',P:'✋',S:'✌️'};
-const rpsBeats={R:'P',P:'S',S:'R'};
-const rpsNames={R:'Rock',P:'Paper',S:'Scissors'};
+const rpsEmoji = {R:'✊', P:'✋', S:'✌️'};
+const rpsNames = {R:'Rock', P:'Paper', S:'Scissors'};
+const rpsBeats = {R:'S', P:'R', S:'P'};
+let rpsHistory = [], rpsScores = {you:0, ai:0, tie:0};
 
 function playRPS(choice) {
   rpsHistory.push(choice);
@@ -1012,18 +1123,16 @@ function playRPS(choice) {
   if(you===ai) { result='🤝 Draw!'; rpsScores.tie++; }
   else if(rpsBeats[you]===ai) { result='🎉 You win!'; rpsScores.you++; }
   else { result='🤖 AI wins!'; rpsScores.ai++; }
-  document.getElementById('rps-status').textContent = `${result} You: ${rpsNames[you]}, AI: ${rpsNames[ai]}`;
+  document.getElementById('rps-status').textContent = `${result}`;
   document.getElementById('rps-yw').textContent = rpsScores.you;
   document.getElementById('rps-aw').textContent = rpsScores.ai;
   document.getElementById('rps-tie').textContent = rpsScores.tie;
-  updateRPSFreq();
 }
 
 function predictRPS() {
   if (rpsHistory.length < 3) return ['R','P','S'][Math.floor(Math.random()*3)];
   const counts = {R:0,P:0,S:0};
   rpsHistory.forEach(c => counts[c]++);
-  // pattern: look at last 2 moves
   const last2 = rpsHistory.slice(-2).join('');
   const pattern3 = {};
   for(let i=0;i<rpsHistory.length-2;i++) {
@@ -1043,17 +1152,6 @@ function predictRPS() {
   return rpsBeats[predicted];
 }
 
-function updateRPSFreq() {
-  const tot = rpsHistory.length || 1;
-  const counts = {R:0,P:0,S:0};
-  rpsHistory.forEach(c=>counts[c]++);
-  ['R','P','S'].forEach(c => {
-    const pct = Math.round(counts[c]/tot*100);
-    document.getElementById('freq-'+c.toLowerCase()).style.width = pct+'%';
-    document.getElementById('pct-'+c.toLowerCase()).textContent = pct+'%';
-  });
-}
-
 function resetRPS() {
   rpsHistory = [];
   rpsScores = {you:0, ai:0, tie:0};
@@ -1063,14 +1161,10 @@ function resetRPS() {
   document.getElementById('rps-yw').textContent = '0';
   document.getElementById('rps-aw').textContent = '0';
   document.getElementById('rps-tie').textContent = '0';
-  ['r','p','s'].forEach(c => {
-    document.getElementById('freq-'+c).style.width = '33%';
-    document.getElementById('pct-'+c).textContent = '0%';
-  });
 }
 
 // ======================== SNAKE ========================
-const SCOLS=16, SROWS=16, SCS=20;
+const SCOLS=16, SROWS=16;
 let snake, snakeFood, snakeDir2, snakeRunning=false, snakeInt=null, snakeScore=0, playerControlled=false;
 
 function resetSnake() {
@@ -1089,18 +1183,15 @@ function placeFood() {
 }
 
 function snakeDir(dx,dy) {
-  // Prevent reversing into yourself
   if (dx !== 0 && snakeDir2.x === -dx) return;
   if (dy !== 0 && snakeDir2.y === -dy) return;
   playerControlled=true;
   snakeDir2={x:dx,y:dy};
-  // Update button label to show player is driving
   const btn=document.getElementById('snakeBtn');
   if(snakeRunning) btn.textContent='⏸ Stop (Manual)';
 }
 
 function floodFill(head, body) {
-  // Count reachable cells from head (excluding body)
   const visited = new Set(body.map(s=>`${s.x},${s.y}`));
   const queue = [head];
   visited.add(`${head.x},${head.y}`);
@@ -1121,26 +1212,21 @@ function floodFill(head, body) {
 function greedySnakeMove() {
   const head = snake[0];
   const dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
-  // Filter to valid (non-wall, non-self) moves
   const valid = dirs.filter(d => {
     const nx=head.x+d.x, ny=head.y+d.y;
     return nx>=0&&nx<SCOLS&&ny>=0&&ny<SROWS&&!snake.some(s=>s.x===nx&&s.y===ny);
   });
   if(!valid.length) return snakeDir2;
-  // Score each direction: prefer toward food, but reject moves that trap us
   let best=null, bestScore=-Infinity;
   for(const d of valid) {
     const nx=head.x+d.x, ny=head.y+d.y;
     const dist = Math.abs(nx-snakeFood.x)+Math.abs(ny-snakeFood.y);
-    // Flood-fill from this next cell (pretend we moved there; tail will have moved too)
-    const futureBody = snake.slice(0,-1); // tail disappears this step
+    const futureBody = snake.slice(0,-1);
     const space = floodFill({x:nx,y:ny}, futureBody);
-    // Reject moves that leave fewer cells than our snake length (we'll trap ourselves)
-    if(space < snake.length * 0.5) continue; // too risky
-    const score = space * 3 - dist; // prioritise open space, then closeness to food
+    if(space < snake.length * 0.5) continue;
+    const score = space * 3 - dist;
     if(score > bestScore) { bestScore=score; best=d; }
   }
-  // If all moves are risky, just pick the one with most open space
   if(!best) {
     let maxSpace=-1;
     for(const d of valid) {
@@ -1178,25 +1264,22 @@ function drawSnake() {
   if(!canvas||!snake) return;
   const dpr = window.devicePixelRatio || 1;
   const displaySize = canvas.parentElement
-    ? Math.min(canvas.parentElement.clientWidth - 32, 360)
+    ? Math.min(canvas.parentElement.clientWidth - 32, 400)
     : 320;
   const size = Math.max(displaySize, 160);
   canvas.style.width = size + 'px';
   canvas.style.height = size + 'px';
   canvas.width = size * dpr;
   canvas.height = size * dpr;
-  const ctx = canvas.getContext('2d');
+  ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const cs = size / SCOLS;
   ctx.fillStyle='#0a0a0f'; ctx.fillRect(0,0,size,size);
-  // grid
   ctx.strokeStyle='#12101e'; ctx.lineWidth=0.5;
   for(let i=0;i<=SCOLS;i++) { ctx.beginPath();ctx.moveTo(i*cs,0);ctx.lineTo(i*cs,SROWS*cs);ctx.stroke(); }
   for(let i=0;i<=SROWS;i++) { ctx.beginPath();ctx.moveTo(0,i*cs);ctx.lineTo(SCOLS*cs,i*cs);ctx.stroke(); }
-  // food
   ctx.fillStyle='#34d399';
   ctx.beginPath();ctx.arc(snakeFood.x*cs+cs/2,snakeFood.y*cs+cs/2,cs/2-1,0,Math.PI*2);ctx.fill();
-  // snake
   snake.forEach((s,i) => {
     ctx.fillStyle = i===0 ? '#c084fc' : `rgba(124,58,237,${Math.max(0.3,1-i/snake.length*0.7)})`;
     ctx.beginPath();ctx.roundRect(s.x*cs+1,s.y*cs+1,cs-2,cs-2,3);ctx.fill();
@@ -1217,7 +1300,6 @@ document.addEventListener('keydown', e => {
   if(map[e.key]) { e.preventDefault(); snakeDir(map[e.key].x, map[e.key].y); }
 });
 
-// Touch swipe support for Snake canvas
 (function() {
   let sx, sy;
   const cvs = document.getElementById('snakeCanvas');
@@ -1231,7 +1313,6 @@ document.addEventListener('keydown', e => {
   }, {passive:true});
 })();
 
-// Redraw canvases on resize / orientation change
 window.addEventListener('resize', () => {
   if (document.getElementById('panel-maze').classList.contains('active')) drawMaze();
   if (document.getElementById('panel-snake').classList.contains('active')) drawSnake();
