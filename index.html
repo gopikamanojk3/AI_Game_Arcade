@@ -534,9 +534,11 @@
         <canvas id="mazeCanvas"></canvas>
       </div>
       <div class="status-bar" id="maze-status">🟣 You (purple) · 🔴 Hunter (red) · 🟢 Goal (green)</div>
-      <div style="display:flex;gap:8px;margin-bottom:1rem">
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
         <button class="btn btn-sm" onclick="initMaze()">New Maze</button>
-        <button class="btn btn-sm btn-ghost" onclick="toggleMazePath()">Show BFS Path</button>
+        <button class="btn btn-sm" id="mazeAutoBtn" onclick="toggleMazeAuto()">▶ Auto Run</button>
+        <button class="btn btn-sm btn-ghost maze-path-btn" onclick="cycleMazePath()">Path 1</button>
+        <button class="btn btn-sm btn-ghost" id="mazeShowPathBtn" onclick="toggleMazePath()">Show Paths</button>
       </div>
       <div class="maze-controls">
         <div></div><button class="maze-btn" onclick="movePlayer(0,-1)">↑</button><div></div>
@@ -749,7 +751,7 @@ initTTT();
 
 // ======================== MAZE ========================
 const COLS = 16, ROWS = 16;
-let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [], goalPath = [], mazeLocked = false, playerStepCount = 0;
+let mazeGrid, playerPos, hunterPos, mazeInterval, showPath = false, bfsPath = [], goalPath = [], mazePaths = [], selectedPathIndex = 0, mazeLocked = false, playerStepCount = 0, mazeAiRunning = false, mazeAiInterval = null;
 
 function addMazeLoops(extra=24) {
   let attempts = 0;
@@ -774,6 +776,13 @@ function addMazeLoops(extra=24) {
 function initMaze() {
   mazeLocked = false;
   playerStepCount = 0;
+  if (mazeAiRunning) {
+    mazeAiRunning = false;
+    clearInterval(mazeAiInterval);
+    mazeAiInterval = null;
+    const autoBtn = document.getElementById('mazeAutoBtn');
+    if (autoBtn) autoBtn.textContent = '▶ Auto Run';
+  }
   mazeGrid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
   generateMaze(0, 0);
   addMazeLoops(28);
@@ -790,9 +799,9 @@ function initMaze() {
       if (mazeGrid[y][x] && !(x===COLS-1&&y===ROWS-1)) candidates.push({x,y});
   hunterPos = candidates[Math.floor(Math.random()*candidates.length)] || {x:COLS-2, y:ROWS-2};
   bfsPath = bfs(hunterPos, playerPos);
-  goalPath = bfs(playerPos, {x:COLS-1, y:ROWS-1}) || [];
+  buildMazePaths();
   drawMaze();
-  document.getElementById('maze-status').textContent = '🟣 You (purple) · 🔴 Hunter (red) · 🟢 Goal (green corner)';
+  setMazeStatus();
 }
 
 function generateMaze(x, y) {
@@ -825,8 +834,94 @@ function bfs(from, to) {
   return [];
 }
 
+function bfsWithAvoid(from, to, avoidEdges = new Set()) {
+  const queue = [{...from, path:[{...from}]}];
+  const visited = new Set([`${from.x},${from.y}`]);
+  while (queue.length) {
+    const {x,y,path} = queue.shift();
+    if (x===to.x && y===to.y) return path;
+    for (const {dx,dy} of [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}]) {
+      const nx=x+dx, ny=y+dy;
+      const k=`${nx},${ny}`;
+      const edge1 = `${x},${y}->${nx},${ny}`;
+      const edge2 = `${nx},${ny}->${x},${y}`;
+      if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&mazeGrid[ny][nx]&&!visited.has(k) && !avoidEdges.has(edge1) && !avoidEdges.has(edge2)) {
+        visited.add(k);
+        queue.push({x:nx,y:ny,path:[...path,{x:nx,y:ny}]});
+      }
+    }
+  }
+  return [];
+}
+
+function buildMazePaths() {
+  const end = {x:COLS-1, y:ROWS-1};
+  const main = bfs(playerPos, end) || [];
+  mazePaths = [main];
+  const avoidEdges = new Set();
+  for (let i=0; i<main.length-1 && mazePaths.length<3; i++) {
+    const start = main[i];
+    const next = main[i+1];
+    const edge = `${start.x},${start.y}->${next.x},${next.y}`;
+    avoidEdges.add(edge);
+    const alt = bfsWithAvoid(playerPos, end, avoidEdges);
+    if (alt.length && !mazePaths.some(p => p.map(v => `${v.x},${v.y}`).join('|') === alt.map(v => `${v.x},${v.y}`).join('|'))) {
+      mazePaths.push(alt);
+    }
+  }
+  if (selectedPathIndex >= mazePaths.length) selectedPathIndex = 0;
+  goalPath = mazePaths[selectedPathIndex] || [];
+}
+
+function cycleMazePath() {
+  if (!mazePaths.length) return;
+  selectedPathIndex = (selectedPathIndex + 1) % mazePaths.length;
+  goalPath = mazePaths[selectedPathIndex];
+  const btn = document.querySelector('#panel-maze button.maze-path-btn');
+  if (btn) btn.textContent = `Path ${selectedPathIndex+1}/${mazePaths.length}`;
+  setMazeStatus();
+  drawMaze();
+}
+
+function setMazeStatus() {
+  const pathCount = mazePaths.length;
+  const selectedTip = pathCount ? `Selected: ${selectedPathIndex+1}/${pathCount}` : 'No path';
+  const dist = goalPath.length > 0 ? goalPath.length - 1 : '∞';
+  const warn = (dist !== '∞' && dist <= 4) ? ' ⚠️ CLOSE!' : '';
+  const mode = mazeAiRunning ? ' (Auto running)' : '';
+  document.getElementById('maze-status').textContent = `🟣 You · 🔴 Hunter · 🟢 Goal  · ${selectedTip} · ${dist} steps${warn}${mode}`;
+}
+
+function toggleMazeAuto() {
+  mazeAiRunning = !mazeAiRunning;
+  const btn = document.getElementById('mazeAutoBtn');
+  if (mazeAiRunning) {
+    if (btn) btn.textContent = '⏸ Stop AI';
+    mazeAiInterval = setInterval(mazeAutoStep, 250);
+  } else {
+    if (btn) btn.textContent = '▶ Auto Run';
+    clearInterval(mazeAiInterval); mazeAiInterval = null;
+  }
+  setMazeStatus();
+}
+
+function mazeAutoStep() {
+  if (mazeLocked || !mazeAiRunning) return;
+  if (!goalPath || goalPath.length < 2) return;
+
+  const currentIndex = goalPath.findIndex(p => p.x===playerPos.x && p.y===playerPos.y);
+  if (currentIndex < 0 || currentIndex === goalPath.length - 1) {
+    buildMazePaths();
+  }
+  const path = mazePaths[selectedPathIndex] || goalPath;
+  const idx = path.findIndex(p => p.x===playerPos.x && p.y===playerPos.y);
+  let next = path[1];
+  if (idx >= 0 && idx < path.length - 1) next = path[idx + 1];
+  if (!next) return;
+  movePlayer(next.x - playerPos.x, next.y - playerPos.y);
+}
+
 function drawMaze() {
-  const canvas = document.getElementById('mazeCanvas');
   if (!canvas || !mazeGrid) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
@@ -856,11 +951,28 @@ function drawMaze() {
     }
   }
   
-  if (showPath && goalPath.length) {
-    ctx.fillStyle = 'rgba(52,211,153,0.35)';
-    for (const {x,y} of goalPath) ctx.fillRect(x*cs+1, y*cs+1, cs-2, cs-2);
+  if (showPath && mazePaths.length) {
+    const palette = ['rgba(52,211,153,0.35)', 'rgba(59,130,246,0.3)', 'rgba(236,72,153,0.28)'];
+    for (let pi=0; pi<mazePaths.length; pi++) {
+      const p = mazePaths[pi];
+      ctx.fillStyle = palette[pi % palette.length];
+      for (const {x,y} of p) ctx.fillRect(x*cs+1, y*cs+1, cs-2, cs-2);
+    }
   }
-  
+
+  if (goalPath.length) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < goalPath.length; i++) {
+      const p = goalPath[i];
+      const cx = p.x*cs + cs/2;
+      const cy = p.y*cs + cs/2;
+      if (i===0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+  }
+
   const gpad = cs * 0.2;
   ctx.fillStyle = '#34d399';
   ctx.beginPath();
@@ -884,7 +996,7 @@ function movePlayer(dx, dy) {
   if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || !mazeGrid[ny][nx]) return;
   playerPos = {x:nx, y:ny};
   playerStepCount++;
-  goalPath = bfs(playerPos, {x:COLS-1, y:ROWS-1}) || [];
+  buildMazePaths();
 
   if (playerPos.x===COLS-1 && playerPos.y===ROWS-1) {
     mazeLocked = true;
@@ -908,16 +1020,14 @@ function movePlayer(dx, dy) {
     return;
   }
 
-  const dist = goalPath.length;
-  const warn = dist <= 3 ? ' ⚠️ CLOSE!' : '';
-  document.getElementById('maze-status').textContent = `Distance to goal: ${dist} steps${warn}`;
+  setMazeStatus();
   drawMaze();
 }
 
 function toggleMazePath() {
   showPath = !showPath;
-  const btn = document.querySelector('#panel-maze button:nth-of-type(2)');
-  if (btn) btn.textContent = showPath ? '🔵 Hide Goal Path' : 'Show Goal Path';
+  const btn = document.getElementById('mazeShowPathBtn');
+  if (btn) btn.textContent = showPath ? '🔵 Hide Paths' : 'Show Paths';
   drawMaze();
 }
 
